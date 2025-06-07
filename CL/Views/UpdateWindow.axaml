@@ -1,0 +1,14 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="370" d:DesignHeight="240"
+        x:Class="CL.UpdateWindow"
+        Title="UpdaterWindow" Height="240" Width="370" Background="Black" Foreground="White" FontFamily="SimSun-ExtB" >
+	<Grid>
+		<Image x:Name="BG" Width="594" Height="315" Opacity="0.6" Stretch="UniformToFill" Source="avares://CL/Assets/SummerNightBG.png"/>
+		<Label x:Name="Version" Content="Оновлення" HorizontalAlignment="Center" Margin="0,105,0,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="White"/>
+		<ProgressBar x:Name="ProgreesBarDowload" HorizontalAlignment="Center" Height="20" Margin="0,220,0,0" VerticalAlignment="Top" Width="373" Foreground="Aquamarine" BorderBrush="Black" Background="#FF343434"/>
+		<Label x:Name="DowoloadMBUpdate" Content="" HorizontalAlignment="Center" Margin="0,132,0,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="White" Width="370" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+	</Grid>
+</Window>

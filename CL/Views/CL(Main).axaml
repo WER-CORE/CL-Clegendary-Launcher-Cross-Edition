@@ -1,0 +1,294 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="960" d:DesignHeight="542"
+        x:Class="CL.Window1"
+        Title="CL(CLegendary Launcher)" FontFamily="Inter 18pt 18pt" FontSize="14" Foreground="White" WindowStartupLocation="CenterScreen"  Icon="avares://CL/Assets/Frame_73.ico" HorizontalContentAlignment="Stretch" HorizontalAlignment="Left" VerticalAlignment="Top" Width="960" Height="542" Background="{x:Null}" CanResize="False">
+
+	<Canvas Name="MainCanvas">
+		<!-- Фон -->
+		<Image x:Name="Bg"
+			   HorizontalAlignment="Center"
+			   Height="542"
+			   VerticalAlignment="Center"
+			   Source="avares://CL/Assets/SummerNightBG.png"
+			   Stretch="UniformToFill">
+			<Image.Effect>
+				<BlurEffect Radius="3"/>
+			</Image.Effect>
+		</Image>
+
+		<!-- Сіра панель -->
+		<Border x:Name="SelectPanel"
+				Canvas.Left="340"
+				Canvas.Top="10"
+				Width="300"
+				Height="34"
+				CornerRadius="12"
+				Background="#202020"
+				BorderThickness="1"/>
+
+		<!-- Панель вибору акаунтів -->
+		<Border x:Name="SelectPanelAccount"
+				Canvas.Left="650"
+				Canvas.Top="10"
+				Width="140" Height="34"
+				BorderThickness="1"
+				CornerRadius="12"
+				Background="#202020">
+		</Border>
+
+		<!-- Поле з ніком -->
+		<TextBox x:Name="NameNik"
+				 Canvas.Left="670"
+				 Canvas.Top="10"
+				 Width="100"
+				 Height="24"
+				 Background="{x:Null}"
+				 Foreground="White"
+				 BorderBrush="{x:Null}"
+				 VerticalContentAlignment="Center"
+				 FontSize="11"
+				 CaretBrush="Aqua"
+				 Text="Відсутній акаунт"
+				 IsReadOnly="False"
+				 FontFamily="Inter 18pt 18pt"
+				 TextWrapping="Wrap"/>
+		
+		<Image x:Name="IconAccount"
+			   Width="32" Height="32"
+			   Canvas.Left="650"
+			   Canvas.Top="10"
+			   HorizontalAlignment="Left"
+			   VerticalAlignment="Center"
+			   Cursor="Hand"
+			   Stretch="Fill"
+			   Margin="-1,0,0,0"
+			   Source="/Assets/big-steve-face-2002298922 2.png"/>
+
+		<!-- Іконка випадаючого списку -->
+		<Image x:Name="CheckMarkAccount"
+			   Canvas.Left="770"
+			   Canvas.Top="23"
+			   Width="12"
+			   Height="8"
+			   HorizontalAlignment="Left"
+			   VerticalAlignment="Top"
+			   Source="avares://CL/Assets/keyboard_arrow_down_100dp_E8EAED_FILL0_wght400_GRAD0_opsz48.png"
+			   Cursor="Hand"
+			   Stretch="Fill"
+			   RenderTransformOrigin="0.506,0.613"/>
+		
+		<!-- Виділення активної вкладки -->
+		<Border x:Name="PanelSelectNow"
+				Canvas.Left="345"
+				Canvas.Top="11"
+				Width="67"
+				Height="30"
+				CornerRadius="11"
+				Background="Gray"
+				Opacity="0.2"/>
+
+		<!-- Вкладка "Модові Збірки" -->
+		<Label x:Name="modbuilds"
+			   Canvas.Left="410"
+			   Canvas.Top="12"
+			   Width=""
+			   Height=""
+			   Background="{x:Null}"
+			   FontFamily="Inter 18pt 18pt"
+			   FontSize="14"
+			   Foreground="White"
+			   HorizontalContentAlignment="Center"
+			   VerticalContentAlignment="Center"
+			   Cursor="Hand"
+			   Content="Модові Збірки"/>
+
+		<!-- Вкладка "Грати" -->
+		<Label x:Name="PlayTXTPanelSelect"
+			   Canvas.Left="350"
+			   Canvas.Top="10"
+			   Width="58"
+			   Height="30"
+			   Background="{x:Null}"
+			   FontFamily="Inter 18pt 18pt"
+			   FontSize="14"
+			   Foreground="White"
+			   HorizontalContentAlignment="Center"
+			   VerticalContentAlignment="Center"
+			   Cursor="Hand"
+			   Content="Грати"/>
+
+		<!-- Вкладка "Моди" -->
+		<Label x:Name="ModsTXTPanelSelect"
+			   Canvas.Left="510"
+			   Canvas.Top="10"
+			   Width="58"
+			   Height="30"
+			   Background="{x:Null}"
+			   FontFamily="Inter 18pt 18pt"
+			   FontSize="14"
+			   Foreground="White"
+			   HorizontalContentAlignment="Center"
+			   VerticalContentAlignment="Center"
+			   Cursor="Hand"
+			   Content="Моди"/>
+
+		<!-- Вкладка "Сервери" -->
+		<Label x:Name="ServerTXTPanelSelect"
+			   Canvas.Left="570"
+			   Canvas.Top="10"
+			   Width="66"
+			   Height="30"
+			   Background="{x:Null}"
+			   FontFamily="Inter 18pt 18pt"
+			   FontSize="14"
+			   Foreground="White"
+			   HorizontalContentAlignment="Center"
+			   VerticalContentAlignment="Center"
+			   Cursor="Hand"
+			   Content="Сервери"/>
+		<!-- Список з всіма акаунтами -->
+		<Canvas Name="PanelManegerAccount" IsVisible="False">
+			<Border x:Name="OnllinePanel"
+					Width="136"
+					Height="134.04"
+					Canvas.Left="650"
+					Canvas.Top="40"
+					BorderThickness="1"
+					CornerRadius="16"
+					Background="#202020"/>
+
+			<Label x:Name="AddProfile"
+				   Content="Додати профіль +"
+				   Width="206"
+				   Height="30"
+				   Canvas.Left="620"
+				   Canvas.Top="140"
+				   HorizontalContentAlignment="Center"
+				   FontFamily="Inter 18pt 18pt"
+				   Cursor="Hand"/>
+
+			<ListBox x:Name="ListAccount"
+					 Width="136"
+					 Height="90"
+					 Canvas.Left="650"
+					 Canvas.Top="50"
+					 Background="#202020"
+					 BorderBrush="{x:Null}"
+					 Foreground="White"
+					 ScrollViewer.VerticalScrollBarVisibility="Hidden"
+					 ScrollViewer.HorizontalScrollBarVisibility="Hidden" />
+		</Canvas>
+
+		<!-- Панель з нижня -->
+		<Border x:Name="PanelFooter"
+				Width="1000"
+				Height="300"
+				BorderThickness="1"
+				CornerRadius="8"
+				Background="#202020"
+				Margin="0,335,0,10"
+				HorizontalAlignment="Stretch" Opacity="0.9"/>
+		<!-- Моніторінг серверів та Список версій майнкрафт-->
+		<ListBox x:Name="ServerMonitoring" HorizontalAlignment="Left" Height="145" Margin="615,360,0,0" VerticalAlignment="Top" Width="315" Background="Gray" Foreground="White" BorderBrush="{x:Null}" Cursor="Hand" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden">		</ListBox>
+		<ListBox x:Name="VersionMinecraftChangeLog" HorizontalAlignment="Left" Height="145" Margin="23,360,0,0" VerticalAlignment="Top" Width="315" Background="Gray" Foreground="White" BorderBrush="{x:Null}" Cursor="Hand" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden">		</ListBox>
+		<!-- Кастомізація,Тека лаунчера,Для власників серверів -->
+		<Border x:Name="SettingPanel" Width="236" Height="40" BorderThickness="1" CornerRadius="12,12,12,12" Background="Gray" Margin="356,370,360,115" Cursor="Hand"/>
+		<Border x:Name="FolderPanel" Width="236" Height="40" BorderThickness="1" CornerRadius="12,12,12,12" Background="Gray" Margin="356,420,360,115" Cursor="Hand"/>
+		<Border x:Name="ServerOwnerPanel" Width="236" Height="40" BorderThickness="1" CornerRadius="12,12,12,12" Background="Gray" Margin="356,470,360,115" Cursor="Hand"/>
+
+
+		<!-- Основна кнопка -->
+		<Border x:Name="PlayButton"
+				Width="230"
+				Height="48"
+				CornerRadius="16"
+				HorizontalAlignment="Left"
+				VerticalAlignment="Top"
+				Margin="357,312,0,0">
+			<Border.Background>
+				<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+					<GradientStop Color="#FF17DA1F" Offset="0"/>
+					<GradientStop Color="#FF18A61E" Offset="1"/>
+				</LinearGradientBrush>
+			</Border.Background>
+			<!-- Контейнер кнопки -->
+			<Grid>
+				<!-- Іконка зліва -->
+				<Image x:Name="IconSelectVersion"
+					   Source="avares://CL/Assets/Vanila.png"
+					   Width="64"
+					   Height="40"
+					   Stretch="Uniform"
+					   HorizontalAlignment="Left"
+					   VerticalAlignment="Center"
+					   Margin="160,0,0,0"/>
+				<Border x:Name="Line" BorderThickness="1" Margin="150,0,0,0" Background="#FF16951B" HorizontalAlignment="Left" VerticalAlignment="Top" Width="3" Height="45"></Border>
+				<!-- Текст "ГРАТИ" -->
+				<TextBlock x:Name="PlayTXT"
+						   Width="100"
+						   Text="ГРАТИ"
+						   FontSize="12"
+						   Foreground="White"
+						   HorizontalAlignment="Center"
+						   VerticalAlignment="Center"
+						   FontFamily="Inter"/>
+
+				<!-- Стрілка або інша іконка -->
+				<Image x:Name="BackMainWindow"
+					   Width="14"
+					   Height="14"
+					   Stretch="Uniform"
+					   HorizontalAlignment="Right"
+					   VerticalAlignment="Center"
+					   Margin="0,2,12,0"
+					   Cursor="Hand"
+					   Source="avares://CL/Assets/keyboard_arrow_down_100dp_E8EAED_FILL0_wght400_GRAD0_opsz48.png"/>
+			</Grid>
+		</Border>
+		<!-- Панель для вибору версії -->
+            <Grid x:Name="SelectVersionTypeGird" Margin="10,2,886,394" IsVisible="False">
+                <Border x:Name="SelectVersionType" BorderThickness="1" CornerRadius="12,12,12,12" Background="Gray" Margin="577,175,-579,-204" Width="149"/>
+                <Border x:Name="SelectVersionVanila" Height="38" Width="139" BorderThickness="1" CornerRadius="7" Background="#202020" Margin="583,177,-574,-87" RenderTransformOrigin="0.5,0.5">
+                    <Border.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform AngleY="-0.054"/>
+                            <RotateTransform/>
+                            <TranslateTransform Y="-0.066"/>
+                        </TransformGroup>
+                    </Border.RenderTransform>
+                    <Grid Background="{DynamicResource MainBackgroundBrush}">
+                        <Image x:Name="IconSelectVersion_Копировать" HorizontalAlignment="Left" Height="31" VerticalAlignment="Center" Width="30" Source="avares://CL/Assets/Vanila.png" Cursor="Hand" Stretch="Fill" Margin="4,0,0,0"/>
+                        <Label x:Name="SettingTXT1_Копировать" FontFamily="Inter 18pt 18pt" Content="Vanila"  HorizontalAlignment="Left" VerticalAlignment="Top" Width="97" Height="24" Background="{x:Null}" FontSize="14" Foreground="White" Margin="33,-5,0,0"/>
+                        <Border x:Name="SelectVersion_Копировать1" BorderThickness="1" CornerRadius="3,3,3,3" Background="Gray" Margin="23,15,46,1" Width="38" Height="14">
+                            <Label x:Name="VersionRelesedVanilLast" FontFamily="Inter 18pt 18pt" Content="1.21.1"  HorizontalAlignment="Center" VerticalAlignment="Center" Width="47" Height="22" Background="{x:Null}" FontSize="10" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+		<Border x:Name="SelectVersion" BorderThickness="1" CornerRadius="3,3,3,3" Background="#202020" Margin="740,170,181,193" RenderTransformOrigin="0.5,0.5" IsVisible="False">
+			<Border.RenderTransform>
+				<TransformGroup>
+					<ScaleTransform/>
+					<SkewTransform AngleX="-0.212"/>
+					<RotateTransform/>
+					<TranslateTransform X="-0.13"/>
+				</TransformGroup>
+			</Border.RenderTransform>
+			<Grid Margin="0,-1,0,1">
+				<Border CornerRadius="3" Background="#202020" Margin="67,5,0,133">
+					<TextBox x:Name="SearchSystemTXT1" TextWrapping="Wrap" Background="Gray" Foreground="White" BorderBrush="{x:Null}" CaretBrush="Aqua" VerticalContentAlignment="Center" FontSize="10" FontFamily="Arial" Padding="15,0,0,0" Text=""/>
+				</Border>
+				<Image x:Name="IconSelectVersion_Копировать3" HorizontalAlignment="Left" Height="18" VerticalAlignment="Top" Width="21" Source="" Cursor="Hand"  Margin="65,3,0,0"/>
+				<CheckBox x:Name="Relesed" Content="Реліз" HorizontalAlignment="Left" VerticalAlignment="Top" Height="16" Width="60" Margin="70,43,0,0" Foreground="White" FontSize="10" IsChecked="True" FontFamily="Arial" Background="" BorderBrush="{x:Null}"/>
+				<CheckBox x:Name="Snapshots" Content="Снапшоти" HorizontalAlignment="Left" VerticalAlignment="Top" Height="15" Width="80" Margin="70,70,0,0" Foreground="White" FontSize="10" IsChecked="False"  FontFamily="Arial" Background="" BorderBrush="{x:Null}" />
+				<CheckBox x:Name="Beta" Content="Бета" HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Width="60" Margin="70,95,0,0" Foreground="White" FontSize="10" IsChecked="False"  FontFamily="Arial" Background="" BorderBrush="{x:Null}" />
+                <CheckBox x:Name="Alpha" Content="Альфа" HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Width="60" Margin="70,120,0,0" Foreground="White" FontSize="10" IsChecked="False" FontFamily="Arial" Background="" BorderBrush="{x:Null}" />
+                <ListBox x:Name="VersionList" Width="70" FontSize="6" FontFamily="Arial" Background="Black" BorderBrush="Transparent" Foreground="" ScrollViewer.VerticalScrollBarVisibility="Hidden" FlowDirection="RightToLeft" Margin="-30,0,58,1" ScrollViewer.HorizontalScrollBarVisibility="Hidden" />
+			</Grid>
+		</Border>
+	</Canvas>
+</Window>
