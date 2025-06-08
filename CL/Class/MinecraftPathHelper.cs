@@ -9,79 +9,35 @@ using System.Threading.Tasks;
 
 namespace CL.Class
 {
+    // / Клас для отримання шляху до папки Minecraft, де зберігаються ванільні версії гри і не тількі
     public static class MinecraftPathHelper
     {
+        /// <summary>
+        /// Отримує шлях до папки Minecraft, де зберігаються ванільні версії гри. І залежить від ОС
+        /// </summary>
+        /// <returns></returns>
         public static string GetDefaultExtractPath()
         {
-            string path;
-
-            if (OperatingSystem.IsWindows())
-            {
-                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CL(Launcher)");
-                MessageBoxManager.GetMessageBoxStandard("Увага", $"Windows: {path}").ShowAsync();
-            }
-            else if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
-            {
-                path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "CLLauncher");
-                MessageBoxManager.GetMessageBoxStandard("Увага", $"Linux або MacOS: {path}").ShowAsync();
-            }
-            else
-            {
-                _ = MessageBoxManager.GetMessageBoxStandard("Помилка", "Невідома операційна система.").ShowAsync();
-                return string.Empty;
-            }
-
-            return path;
-        }
-        public static string? FindJavaPath()
-        {
-            // 1. JAVA_HOME
-            string? javaHome = Environment.GetEnvironmentVariable("JAVA_HOME");
-            if (!string.IsNullOrWhiteSpace(javaHome))
-            {
-                var javaFromHome = Path.Combine(javaHome, "bin", GetJavaExecutableName());
-                if (File.Exists(javaFromHome))
-                    return javaFromHome;
-            }
-
-            // 2. Перевірити у PATH
-            try
-            {
-                var process = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "which",
-                        Arguments = "java",
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    }
-                };
+                string basePath;
 
                 if (OperatingSystem.IsWindows())
                 {
-                    process.StartInfo.FileName = "where";
+                    basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".ClMinecraft");
                 }
-
-                process.Start();
-                string output = process.StandardOutput.ReadToEnd();
-                process.WaitForExit();
-
-                if (!string.IsNullOrWhiteSpace(output))
+                else if (OperatingSystem.IsLinux())
                 {
-                    var javaPath = output.Split('\n', '\r').FirstOrDefault(x => x.EndsWith(GetJavaExecutableName()));
-                    if (File.Exists(javaPath))
-                        return javaPath;
+                    basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".clminecraft");
                 }
-            }
-            catch { }
-
-            return null;
+                else if (OperatingSystem.IsMacOS())
+                {
+                    basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Library", "Application Support", "CLMinecraft");
+                }
+                else
+                {
+                    basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".clminecraft");
+                }
+                MessageBoxManager.GetMessageBoxStandard("Шлях встановлено", $"Новий шлях до лаунчера: {basePath}").ShowAsync();
+            return basePath;
         }
-
-        public static string GetJavaExecutableName() =>
-            OperatingSystem.IsWindows() ? "java.exe" : "java";
-
     }
 }

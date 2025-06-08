@@ -2,8 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using SharpCompress.Archives;
-using SharpCompress.Common;
 using System.IO;
 using System.Net;
 using System;
@@ -11,6 +9,8 @@ using System.Reflection;
 using MsBox.Avalonia;
 using System.Threading.Tasks;
 using System.Net.Http;
+using SharpCompress.Archives;
+using SharpCompress.Common;
 
 namespace CL;
 
@@ -20,13 +20,15 @@ public partial class UpdateWindow : Window
     private ProgressBar ProgreesBarDowloadObj;
     private Label DowoloadMBUpdateObj;
     private Label VersionObj;
+
+
     public UpdateWindow()
     {
-        InitializeComponent();
+        InitializeComponent(); // Ініціалізація компонентів(завантаження XAML)
         this.Loaded += (s, e) =>
         {
             CheckUpdate();
-        };
+        }; // Перевірка наявності оновлень при завантаженні вікна
     }
     private void InitializeComponent()
     {
@@ -37,6 +39,7 @@ public partial class UpdateWindow : Window
         Version = this.FindControl<Label>("Version");
     }
 
+    // Перевірка наявності оновлень та завантаження нової версії лаунчера
     private async void CheckUpdate()
     {
         try
@@ -94,6 +97,7 @@ public partial class UpdateWindow : Window
             await MessageBoxManager.GetMessageBoxStandard("Помилка", "Помилка завантаження оновлення\n" + ex.Message).ShowAsync();
         }
     }
+    // Шлях для розпакування архіву
     string GetDefaultExtractPath()
     {
         if (OperatingSystem.IsWindows())
@@ -114,10 +118,12 @@ public partial class UpdateWindow : Window
             return null;
         }
     }
+    // Шлях для завантаження архіву
     string GetDownloadPath()
     {
         return Path.Combine(Path.GetTempPath(), "update_cl_launcher.rar");
     }
+    // Метод для розпакування архіву
     async void Extract(string archivePath, string extractPath)
     {
         try

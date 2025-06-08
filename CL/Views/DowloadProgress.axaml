@@ -1,0 +1,17 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="615" d:DesignHeight="290"
+        x:Class="CL.DowloadProgress"
+        Title="DowloadProgress" Height="290" Width="615" Background="{x:Null}" CanResize="False" WindowStartupLocation="CenterScreen" Icon="avares://CL/Assets/Frame_73.ico">
+	<Grid x:Name="MainGird" Background="#202020">
+		<ProgressBar x:Name="ProgressDowloadVersion" HorizontalAlignment="Center" Height="30" Margin="0,180,0,0" VerticalAlignment="Top" Width="483" Background="#FF242424" Foreground="Aqua"/>
+		<ProgressBar x:Name="ProgressDowloadFile" HorizontalAlignment="Center" Height="30" Margin="0,89,0,0" VerticalAlignment="Top" Width="483" Background="#FF242424" Foreground="Aqua"/>
+		<Label x:Name="ProgressFileDowloadTXT" Content="0%" HorizontalAlignment="Center" Height="30" Margin="0,89,0,0" VerticalAlignment="Top" Width="483" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+		<Label x:Name="ProgressDowloadTXT" Content="0%" HorizontalAlignment="Center" Height="30" Margin="0,180,0,0" VerticalAlignment="Top" Width="483" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+		<Label x:Name="VersionTXT" Content="" HorizontalAlignment="Center" Height="30" Margin="0,139,0,0" VerticalAlignment="Top" Width="483" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+		<Label x:Name="FileTXT" Content="" HorizontalAlignment="Center" Height="30" Margin="0,20,0,0" VerticalAlignment="Top" Width="483" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+		<Label x:Name="FileTXTName" Content="" HorizontalAlignment="Center" Height="30" Margin="0,55,0,0" VerticalAlignment="Top" Width="483" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+	</Grid>
+</Window>

@@ -7,13 +7,14 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
+using CL.Class;
 
 namespace CL.Views
 {
     public partial class MainWindow : Window
     {
-        private Random _random = new Random();
-        private readonly List<string> RandomPhrases = new List<string>
+        private Random _random = new Random(); // Ініціалізація генератора випадкових чисел
+        private readonly List<string> RandomPhrases = new List<string> 
         {
     "Сонце сяє на повну потужність...",
     "Запасаємося морозивом для спекотних днів...",
@@ -32,14 +33,16 @@ namespace CL.Views
     "Влаштовуємо вечірній кінопоказ просто неба...",
     "Відкриваємо вікна, запускаємо цикад і вітерець...",
     "Слухаємо ледь чутне «дз-з-з» комарів... і тікаємо!",
-        };
+        }; // Список випадкових фраз для відображення під час завантаження
 
 
         public MainWindow()
         {
             InitializeComponent();
-            CheckUpdate();
+            CheckUpdate(); // Перевірка наявності оновлень при завантаженні вікна
         }
+
+        // Перевірка наявності оновлень та завантаження нової версії лаунчера
         private async void CheckUpdate()
         {
             string versionLauncher = Assembly
@@ -74,8 +77,11 @@ namespace CL.Views
                 this.Hide();
             }
         }
+
+        // Метод для асинхронного завантаження прогресу
         private async void StartLoadingAsync()
         {
+            AnimationHelper animationHelper = new AnimationHelper();
             LoadingProgressBar.Value = 0;
 
             for (int i = 0; i <= 100; i++)
@@ -83,7 +89,7 @@ namespace CL.Views
                 double previousValue = LoadingProgressBar.Value;
                 double targetValue = i;
 
-                await AnimateProgressBarAsync(previousValue, targetValue, TimeSpan.FromMilliseconds(100));
+                await animationHelper.AnimateProgressBarAsync(previousValue, targetValue, TimeSpan.FromMilliseconds(100),LoadingProgressBar);
 
                 if (i % 20 == 0)
                 {
@@ -96,6 +102,8 @@ namespace CL.Views
 
             OpenMainWindow();
         }
+
+        // Метод для відкриття головного вікна та закриття поточного
         private void OpenMainWindow()
         {
             var cl_main = new Window1();
@@ -109,25 +117,12 @@ namespace CL.Views
             this.Close();
             DiscordController.Deinitialize();
         }
+        // Метод для завантаження версії лаунчера з інтернету
         public static string LoadFileVersion(string url)
         {
             using var client = new HttpClient();
             var content = client.GetStringAsync(url).Result;
             return content;
         }
-        private async Task AnimateProgressBarAsync(double from, double to, TimeSpan duration)
-        {
-            int steps = 10;
-            double stepValue = (to - from) / steps;
-            int stepTime = (int)(duration.TotalMilliseconds / steps);
-
-            for (int i = 1; i <= steps; i++)
-            {
-                LoadingProgressBar.Value = from + (stepValue * i);
-                await Task.Delay(stepTime);
-            }
-        }
-
-
     }
 }

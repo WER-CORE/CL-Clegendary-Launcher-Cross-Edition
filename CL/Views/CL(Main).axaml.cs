@@ -4,18 +4,19 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CL.Class;
-using ProjBobcat.DefaultComponent.Launch;
-using ProjBobcat.Interface;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using ProjBobcat.Class.Model;
-using ProjBobcat.DefaultComponent;
 using System.Linq;
 using MsBox.Avalonia;
-using ProjBobcat.DefaultComponent.Authenticator;
-using ProjBobcat.Class;
+using System.Collections;
+using Avalonia.Platform.Storage;
+using CmlLib.Core;
+using CmlLib.Core.Auth;
+using CmlLib.Core.ProcessBuilder;
+using CL.Script;
+using CmlLib.Core.Version;
 
 namespace CL;
 
@@ -29,7 +30,7 @@ public partial class Window1 : Avalonia.Controls.Window
     public Border _SelectVersionVanila => this.FindControl<Border>("SelectVersionVanila");
     public Image _BackMainWindow => this.FindControl<Image>("BackMainWindow");
     public Label _PlayTXT => this.FindControl<Label>("PlayTXTPanelSelect");
-    public Label _PlayTXTMinecraft => this.FindControl<Label>("PlayTXT");
+    public TextBlock _PlayTXTMinecraft => this.FindControl<TextBlock>("PlayTXT");
     public Label _ModBuild => this.FindControl<Label>("modbuilds");
     public Label _ModsTXT => this.FindControl<Label>("ModsTXTPanelSelect");
     public Label _ServerTXT => this.FindControl<Label>("ServerTXTPanelSelect");
@@ -37,15 +38,18 @@ public partial class Window1 : Avalonia.Controls.Window
     public Panel _PanelManegerAccount => this.FindControl<Panel>("PanelManegerAccount");
     public TextBlock _TextBlockAccountName => this.FindControl<TextBlock>("NameNik");
 
-
     public Window1()
     {
-        InitializeComponent();
-        _CheckMarkAccount.PointerPressed += _CheckMarkAccount_PointerPressed;
-        _BackMainWindow.PointerPressed += _BackMainWindow_PointerPressed;
-        _SelectVersionVanila.PointerPressed += _SelectVersionVanila_PointerPressed;
+        InitializeComponent(); // Ініціалізація компонентів(завантаження XAML)
 
-        _PlayTXTMinecraft.PointerPressed += async (s, e) => {
+        AnimationHelper animationHelper = new AnimationHelper(); // Ініціалізація анімаційного помічника    
+        _CheckMarkAccount.PointerPressed += _CheckMarkAccount_PointerPressed; // Обробка натискання на кнопку "CheckMarkAccount" для управління панеллю облікових записів
+        _BackMainWindow.PointerPressed += _BackMainWindow_PointerPressed; // Обробка натискання на кнопку "BackMainWindow" для управління панеллю вибору версії
+        _SelectVersionVanila.PointerPressed += _SelectVersionVanila_PointerPressed; // Обробка натискання на кнопку "SelectVersionVanila" для управління панеллю вибору версії ванільної гри
+        _VersionVanil.SelectionChanged += _VersionVanil_SelectionChanged; ; // Обробка натискання на список версій ванільної гри
+
+        _PlayTXTMinecraft.PointerPressed += async (s, e) =>
+        {
             var selectedVersion = _VersionVanil.SelectedItem as string;
 
             if (string.IsNullOrEmpty(selectedVersion))
@@ -55,13 +59,24 @@ public partial class Window1 : Avalonia.Controls.Window
             }
 
             LaunchMinecraft(selectedVersion);
-        };
-        _PlayTXT.PointerPressed += (s, e) => { AnimateBorder(0, 0, _SelectNow); };
-        _ModBuild.PointerPressed += (s, e) => { AnimateBorder(80, 0, _SelectNow); };
-        _ModsTXT.PointerPressed += (s, e) => { AnimateBorder(160, 0, _SelectNow); };
-        _ServerTXT.PointerPressed += (s, e) => { AnimateBorder(223, 0, _SelectNow); };
+        }; // Обробка натискання на кнопку "PlayTXT" для запуску Minecraft з обраною версією
+
+        _PlayTXT.PointerPressed +=  (s, e) => { animationHelper.AnimateBorder(0, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "PlayTXTPanelSelect"
+        _ModBuild.PointerPressed += (s, e) => { animationHelper.AnimateBorder(80, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "modbuilds"
+        _ModsTXT.PointerPressed += (s, e) => { animationHelper.AnimateBorder(160, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "ModsTXTPanelSelect"
+        _ServerTXT.PointerPressed += (s, e) => { animationHelper.AnimateBorder(223, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "ServerTXTPanelSelect"
     }
 
+    // Обробка зміни вибору версії ванільної гри в ListBox
+    private void _VersionVanil_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (_VersionVanil.SelectedItem != null)
+        {
+            var selectedVersion = _VersionVanil.SelectedItem as string;
+            _PlayTXTMinecraft.Text = $"ГРАТИ В ({selectedVersion})";
+        }
+    }
+    // Обробка натискання на кнопку "SelectVersionVanila" для приховання/показу панелі вибору версії ванільної гри
     private async void _SelectVersionVanila_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
         var animHelper = new AnimationHelper();
@@ -69,21 +84,23 @@ public partial class Window1 : Avalonia.Controls.Window
         if (_SelectVersion.IsVisible)
         {
             await animHelper.FadeOutAsync(_SelectVersion, 0.3);
-            ShowVanillaVersionListAsync();
             return;
         }
         else
         {
+            ShowVanillaVersionListAsync();
             await animHelper.FadeInAsync(_SelectVersion, 0.3);
         }
     }
 
+    // Обробка натискання на кнопку "BackMainWindow" для приховання/показу панелі вибору версії і приховання панелі вибору версії ванільної гри
     private async void _BackMainWindow_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
         var animHelper = new AnimationHelper();
 
         if (_SelectVersionTypeGird.IsVisible)
         {
+            if (_SelectVersion.IsVisible) { await animHelper.FadeOutAsync(_SelectVersion, 0.2); }
             await animHelper.FadeOutAsync(_SelectVersionTypeGird, 0.3);
             return;
         }
@@ -93,6 +110,7 @@ public partial class Window1 : Avalonia.Controls.Window
         }
     }
 
+    // Обробка натискання на кнопку "CheckMarkAccount" для приховання/показу панеллю облікових записів
     private async void _CheckMarkAccount_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
         var animHelper = new AnimationHelper();
@@ -107,99 +125,57 @@ public partial class Window1 : Avalonia.Controls.Window
             await animHelper.FadeInAsync(_PanelManegerAccount, 0.3);
         }
     }
-    private IVersionLocator _versionLocator;
-
-    private async Task<List<string>> LoadVanillaVersionsAsync()
-    {
-        string minecraftPath = MinecraftPathHelper.GetDefaultExtractPath();
-        _versionLocator = new DefaultVersionLocator(minecraftPath, Guid.NewGuid())
-        {
-
-        };
-
-        var versions = await Task.Run(() => _versionLocator.GetAllGames());
-
-        var vanillaVersions = versions
-            .Where(v => v.Id.StartsWith("1.") && !v.Id.Contains("forge") && !v.Id.Contains("fabric"))
-            .Select(v => v.Id)
-            .ToList();
-
-        return vanillaVersions;
-    }
+    // Ініціалізація компонентів(завантаження XAML)
     private void InitializeComponent()
     {
         Avalonia.Markup.Xaml.AvaloniaXamlLoader.Load(this);
-
     }
-    private void AnimateBorder(double targetX, double targetY, Control border)
-    {
-        const int durationMs = 300;
-        const int fps = 60;
-        int frameCount = durationMs * fps / 1000;
-        int currentFrame = 0;
-
-        if (border.RenderTransform is not TranslateTransform transform)
-        {
-            transform = new TranslateTransform();
-            border.RenderTransform = transform;
-        }
-
-        double startX = transform.X;
-        double startY = transform.Y;
-        double deltaX = targetX - startX;
-        double deltaY = targetY - startY;
-
-        var timer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromMilliseconds(1000.0 / fps)
-        };
-
-        timer.Tick += (_, _) =>
-        {
-            currentFrame++;
-            double t = (double)currentFrame / frameCount;
-
-            t = 1 - Math.Pow(1 - t, 4);
-
-            transform.X = startX + deltaX * t;
-            transform.Y = startY + deltaY * t;
-
-            if (currentFrame >= frameCount)
-                timer.Stop();
-        };
-
-        timer.Start();
-    }
+    // Метод для отримання списку ванільних версій Minecraft і їх відображення в ListBox
     private async void ShowVanillaVersionListAsync()
     {
-        var versions = await LoadVanillaVersionsAsync();
-        _VersionVanil.ItemsSource = versions;
+        _VersionVanil.Items?.Clear();
+        var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
+        var launcher = new MinecraftLauncher(path);
+        var versions = await launcher.GetAllVersionsAsync();
+
+        foreach (var item in versions)
+        {
+            _VersionVanil.Items.Add(item.Name);
+        }
     }
+    // Метод для запуску Minecraft з обраною версією
     private async void LaunchMinecraft(string version)
     {
-        string? javaPath = MinecraftPathHelper.FindJavaPath();
-        if (string.IsNullOrWhiteSpace(javaPath))
-        {
-            await MessageBoxManager.GetMessageBoxStandard("Java не знайдено", "Будь ласка, оберіть правильний виконуваний файл Java.").ShowAsync();
-            return;
-        }
+        DowloadProgress dowloadProgress = new DowloadProgress();
+        dowloadProgress.Show();
 
-        string mcPath = MinecraftPathHelper.GetDefaultExtractPath();
+        var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
+        var launcher = new MinecraftLauncher(path);
+        System.Net.ServicePointManager.DefaultConnectionLimit = 1000000;
 
-        var launchOptions = new LaunchSettings
+        launcher.FileProgressChanged += (sender, args) =>
         {
-            Version = version,
-            GamePath = mcPath,
-            VersionInsulation = false,
-            GameResourcePath = mcPath,
-            Authenticator = new OfflineAuthenticator
-            {
-                Username = "Player"
-            }
+            int fileProgress = args.TotalTasks > 0 ? (int)((double)args.ProgressedTasks / args.TotalTasks * 100) : 0;
+            dowloadProgress.DowloadProgressBarFileTask(args.TotalTasks, args.ProgressedTasks, args.Name);
+            dowloadProgress.DowloadProgressBarVersion(fileProgress, version);
         };
 
-        var core = new ProjBobcat.Class.Launch.GameCore(launchOptions);
-        core.Launch();
-    }
+        launcher.ByteProgressChanged += (sender, args) =>
+        {
+            int byteProgress = args.TotalBytes > 0 ? (int)((double)args.ProgressedBytes / args.TotalBytes * 100) : 0;
+            dowloadProgress.DowloadProgressBarFile(byteProgress);
+        };
 
+        await launcher.InstallAsync(version);        
+        var process = await launcher.InstallAndBuildProcessAsync(version, new MLaunchOption
+        {
+            Session = MSession.CreateOfflineSession("Gamer123"),
+            MaximumRamMb = 2048
+        });
+        process.Start();
+
+        this.WindowState = WindowState.Minimized;
+        dowloadProgress.Close();
+        //await DiscordController.UpdatePresence($"Грає версію {version}");
+    }
 }
