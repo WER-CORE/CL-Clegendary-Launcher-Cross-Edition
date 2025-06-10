@@ -472,23 +472,18 @@ public partial class Window1 : Avalonia.Controls.Window
             Directory.CreateDirectory(directoryPath);
         }
 
-        // Serialize the profiles to JSON
         var jsonToWrite = JsonConvert.SerializeObject(profiles, Formatting.Indented);
-
-        // Encrypt the serialized JSON data
         var encryptedData = EncryptData(jsonToWrite);
 
-        // Write the encrypted data to the file
         File.WriteAllBytes(profilesManegerPath, encryptedData);
 
-        LoadProfilesAndAddToListBox();  // Оновлюємо інтерфейс
+        LoadProfilesAndAddToListBox();
     }
 
     public void SaveProfile(ProfileItem profileItem)
     {
         var profiles = LoadProfiles();
 
-        // Якщо профіль вже існує, просто виходимо
         if (profiles.Any(p => p.NameAccount == profileItem.NameAccount))
         {
             MessageBoxManager.GetMessageBoxStandard("!","Цей профіль вже існує!");
@@ -496,7 +491,7 @@ public partial class Window1 : Avalonia.Controls.Window
         }
 
         profiles.Add(profileItem);
-        SaveProfiles(profiles);  // Використовуємо загальний метод
+        SaveProfiles(profiles); 
     }
     public List<ProfileItem> LoadProfiles()
     {
@@ -510,12 +505,8 @@ public partial class Window1 : Avalonia.Controls.Window
 
         try
         {
-            var encryptedData = File.ReadAllBytes(profilesManegerPath); // Reading binary data from the file
-
-            // Decrypt the binary data to a JSON string
+            var encryptedData = File.ReadAllBytes(profilesManegerPath);
             var decryptedJson = DecryptData(encryptedData);
-
-            // Deserialize the decrypted JSON string into List<ProfileItem>
             var profiles = JsonConvert.DeserializeObject<List<ProfileItem>>(decryptedJson) ?? new List<ProfileItem>();
 
             return profiles;
@@ -529,7 +520,7 @@ public partial class Window1 : Avalonia.Controls.Window
     private byte[] EncryptData(string plainText)
     {
         byte[] key = GetEncryptionKey();
-        byte[] iv = new byte[16]; // Можете згенерувати у файлі encryption.iv
+        byte[] iv = new byte[16];
 
         using (Aes aes = Aes.Create())
         {
@@ -557,7 +548,7 @@ public partial class Window1 : Avalonia.Controls.Window
     private string DecryptData(byte[] cipherText)
     {
         byte[] key = GetEncryptionKey();
-        byte[] iv = new byte[16]; // Повинен бути таким же, як у шифруванні
+        byte[] iv = new byte[16]; 
 
         using (Aes aes = Aes.Create())
         {
