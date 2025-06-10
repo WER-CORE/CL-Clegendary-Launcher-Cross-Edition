@@ -58,5 +58,17 @@
     <Compile Update="Views\CL(Main).axaml.cs">
       <DependentUpon>CL%28Main%29.axaml</DependentUpon>
     </Compile>
+    <Compile Update="Views\Settings1.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings1.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Views\Settings1.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings1.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 </Project>

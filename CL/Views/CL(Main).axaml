@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="960" d:DesignHeight="542"
         x:Class="CL.Window1"
-        Title="CL(CLegendary Launcher)" FontFamily="Inter 18pt 18pt" FontSize="14" Foreground="White" WindowStartupLocation="CenterScreen"  Icon="avares://CL/Assets/Frame_73.ico" HorizontalContentAlignment="Stretch" HorizontalAlignment="Left" VerticalAlignment="Top" Width="960" Height="542" Background="{x:Null}" CanResize="False">
+        Title="CL(CLegendary Launcher) - Main Window" FontFamily="Inter" FontSize="14" Foreground="White" WindowStartupLocation="CenterScreen"  Icon="avares://CL/Assets/Frame_73.ico" HorizontalContentAlignment="Stretch" HorizontalAlignment="Left" VerticalAlignment="Top" Width="960" Height="542" Background="{x:Null}" CanResize="False">
 
 	<Canvas Name="MainCanvas">
 		<!-- Фон -->
@@ -40,23 +40,21 @@
 				Background="#202020">
 		</Border>
 
-		<!-- Поле з ніком -->
-		<TextBox x:Name="NameNik"
-				 Canvas.Left="670"
-				 Canvas.Top="10"
+		<!-- Текст з ніком -->
+		<Label x:Name="NameNik"
+				 Canvas.Left="680"
+				 Canvas.Top="12"
 				 Width="100"
 				 Height="24"
 				 Background="{x:Null}"
 				 Foreground="White"
-				 BorderBrush="{x:Null}"
 				 VerticalContentAlignment="Center"
+			     HorizontalAlignment="Center"
 				 FontSize="11"
-				 CaretBrush="Aqua"
-				 Text="Відсутній акаунт"
-				 IsReadOnly="False"
-				 FontFamily="Inter 18pt 18pt"
-				 TextWrapping="Wrap"/>
+				 Content="Відсутній акаунт"
+				 FontFamily="Inter"/>
 		
+		<!-- Іконка акаунта(залежить від тип акаунта) -->
 		<Image x:Name="IconAccount"
 			   Width="32" Height="32"
 			   Canvas.Left="650"
@@ -195,12 +193,12 @@
 				Margin="0,335,0,10"
 				HorizontalAlignment="Stretch" Opacity="0.9"/>
 		<!-- Моніторінг серверів та Список версій майнкрафт-->
-		<ListBox x:Name="ServerMonitoring" HorizontalAlignment="Left" Height="145" Margin="615,360,0,0" VerticalAlignment="Top" Width="315" Background="Gray" Foreground="White" BorderBrush="{x:Null}" Cursor="Hand" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden">		</ListBox>
-		<ListBox x:Name="VersionMinecraftChangeLog" HorizontalAlignment="Left" Height="145" Margin="23,360,0,0" VerticalAlignment="Top" Width="315" Background="Gray" Foreground="White" BorderBrush="{x:Null}" Cursor="Hand" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden">		</ListBox>
+		<ListBox x:Name="ServerMonitoring" HorizontalAlignment="Left" Height="145" Margin="615,360,0,0" VerticalAlignment="Top" Width="315" Background="#FF202020" Foreground="White" BorderBrush="White" Cursor="Hand" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden">		</ListBox>
+		<ListBox x:Name="VersionMinecraftChangeLog" HorizontalAlignment="Left" Height="145" Margin="23,360,0,0" VerticalAlignment="Top" Width="315" Background="#FF202020" Foreground="White" BorderBrush="White" Cursor="Hand" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden">		</ListBox>
 		<!-- Кастомізація,Тека лаунчера,Для власників серверів -->
-		<Border x:Name="SettingPanel" Width="236" Height="40" BorderThickness="1" CornerRadius="12,12,12,12" Background="Gray" Margin="356,370,360,115" Cursor="Hand"/>
-		<Border x:Name="FolderPanel" Width="236" Height="40" BorderThickness="1" CornerRadius="12,12,12,12" Background="Gray" Margin="356,420,360,115" Cursor="Hand"/>
-		<Border x:Name="ServerOwnerPanel" Width="236" Height="40" BorderThickness="1" CornerRadius="12,12,12,12" Background="Gray" Margin="356,470,360,115" Cursor="Hand"/>
+		<Border x:Name="SettingPanel" Width="236" Height="40" BorderThickness="1" CornerRadius="12,12,12,12" Background="#FF202020" Margin="356,370,360,115" Cursor="Hand"/>
+		<Border x:Name="FolderPanel" Width="236" Height="40" BorderThickness="1" CornerRadius="12,12,12,12" Background="#FF202020" Margin="356,420,360,115" Cursor="Hand"/>
+		<Border x:Name="ServerOwnerPanel" Width="236" Height="40" BorderThickness="1" CornerRadius="12,12,12,12" Background="#FF202020" Margin="356,470,360,115" Cursor="Hand"/>
 
 
 		<!-- Основна кнопка -->

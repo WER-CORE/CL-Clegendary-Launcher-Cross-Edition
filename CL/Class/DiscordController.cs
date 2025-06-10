@@ -15,7 +15,7 @@ namespace CL.Script
         /// </summary>
         /// <param name="textDetails"></param>
         /// <returns></returns>
-        public static async Task Initialize(string textDetails)
+        public static void Initialize(string textDetails)
         {
 
             clientdsc.Initialize();
@@ -37,7 +37,7 @@ namespace CL.Script
         /// </summary>
         /// <param name="textDetails"></param>
         /// <returns></returns>
-        public static async Task UpdatePresence(string textDetails)
+        public static void UpdatePresence(string textDetails)
         {
             clientdsc.UpdateDetails("Український лаунчер майнкрафт");
             clientdsc.UpdateState($"{textDetails}");

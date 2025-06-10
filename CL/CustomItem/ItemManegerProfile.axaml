@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="196" d:DesignHeight="50"
+             x:Class="CL.CustomItem.ItemManegerProfile" Width="196" Height="50">
+    <Grid x:Name="MainGird">
+        <Border x:Name="FonBorder" BorderThickness="1" Background="#FF202020" CornerRadius="9,9,9,9" Width="196"/>
+        <Image x:Name="IconAccountType" HorizontalAlignment="Left" Height="42" Margin="5,5,0,0" VerticalAlignment="Top" Width="45" Source="avares://CL/Assets/big-steve-face-2002298922 2.png" Stretch="Fill" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+        <TextBlock x:Name="NameAccount" HorizontalAlignment="Left" Margin="50,5,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Foreground="White" Width="126" Height="38" FontFamily="Inter 18pt 18pt" FontSize="11"/>
+        <Image x:Name="DeleteAccount" HorizontalAlignment="Left"  Height="20" Margin="173,28,0,0" VerticalAlignment="Top" Width="20" Source="avares://CL/Assets/delete_1000dp_E8EAED_FILL0_wght400_GRAD0_opsz48.png" Stretch="UniformToFill" Cursor="Hand" RenderTransformOrigin="0.476,0.188" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+        <Grid x:Name="ClickSelectAccount" HorizontalAlignment="Left" Height="50" VerticalAlignment="Center" Width="170" Cursor="Hand" Background="#00000000"/>
+    </Grid>
+</UserControl>

@@ -21,19 +21,23 @@ public partial class DowloadProgress : Window
     }
     private void InitializeComponent()
     {
-        Avalonia.Markup.Xaml.AvaloniaXamlLoader.Load(this);
+        AvaloniaXamlLoader.Load(this);
     }
+
+    // Метод для оновлення прогресу завантаження версії
     public void DowloadProgressBarVersion(int progress, object version)
     {
         _VersionTXT.Content = "Завантажується версія " + version;
         _ProgressDowloadVersion.Value = progress;
         _ProgressDowloadTXT.Content = progress + "%";
     }
+    // Метод для оновлення прогресу завантаження файлів
     public void DowloadProgressBarFileTask(int filedowload, int filetotaldowload, string namefile)
     {
         _FileTXTName.Content = $"{namefile}";
         _FileTXT.Content = $"Завантажено {filetotaldowload} з {filedowload}";
     }
+    // Метод для оновлення прогресу завантаження файлів у відсотках
     public void DowloadProgressBarFile(int progress)
     {
         _ProgressDowloadFile.Value = progress;

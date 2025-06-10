@@ -24,13 +24,17 @@
 			<RectangleGeometry RadiusX="20" RadiusY="20" Rect="0,0,594,315"/>
 		</Border.Clip>
 
+		<!-- Головний контейнер -->
 		<Grid x:Name="SnowGrid">
+			
+			<!-- Прогрес завантаження -->
 			<Border HorizontalAlignment="Center" VerticalAlignment="Top"
                        CornerRadius="2" Background="#333" Width="594" Height="15" Margin="0,300,0,0">
 				<ProgressBar Name="LoadingProgressBar"
 							 Value="0" Maximum="100" Height="20"
 							 Foreground="#FF8ED6F3" Background="Transparent"/>
 			</Border>
+			<!-- Фон -->
 			<Image x:Name="BG" Width="594" Height="315" Opacity="0.6" Stretch="UniformToFill" Source="avares://CL/Assets/SummerNightBG.png"/>
 			<!-- Текст завантаження -->
 			<TextBlock Name="LoadingText" Text="Завантаження..."

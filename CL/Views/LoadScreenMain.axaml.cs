@@ -66,7 +66,7 @@ namespace CL.Views
                     }
                     if (versionLauncher == versionToInternet)
                     {
-                        await DiscordController.Initialize($"В віконці завантаження");
+                        DiscordController.Initialize($"В віконці завантаження");
                         StartLoadingAsync();
                     }
                 }
