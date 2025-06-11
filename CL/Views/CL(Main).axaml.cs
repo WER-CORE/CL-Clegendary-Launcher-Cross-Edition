@@ -1,8 +1,4 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Avalonia.Media;
-using Avalonia.Threading;
 using CL.Class;
 using System;
 using System.Collections.Generic;
@@ -10,22 +6,21 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Linq;
 using MsBox.Avalonia;
-using System.Collections;
-using Avalonia.Platform.Storage;
 using CmlLib.Core;
 using CmlLib.Core.Auth;
 using CmlLib.Core.ProcessBuilder;
-using CL.Script;
-using CmlLib.Core.Version;
 using Newtonsoft.Json.Linq;
 using System.Net.Http;
 using System.Diagnostics;
 using CL.CustomItem;
 using CmlLib.Core.Auth.Microsoft;
 using Newtonsoft.Json;
-using static System.Collections.Specialized.BitVector32;
-using CL.Views;
 using System.Security.Cryptography;
+using Avalonia.Media.Imaging;
+using MsBox.Avalonia.Dto;
+using MsBox.Avalonia.Enums;
+using MojangAPI;
+using MojangAPI.Model;
 
 namespace CL;
 
@@ -33,13 +28,24 @@ public partial class Window1 : Avalonia.Controls.Window
 {
 
     #region Елементи керування
+    public ListBox _ListAccount => this.FindControl<ListBox>("ListAccount")!;
     public ListBox _VersionVanil => this.FindControl<ListBox>("VersionList")!;
     public ListBox _VersionMinecraftChangeLog => this.FindControl<ListBox>("VersionMinecraftChangeLog")!;
     public Border _SelectVersion => this.FindControl<Border>("SelectVersion")!;
     public Grid _SelectVersionTypeGird => this.FindControl<Grid>("SelectVersionTypeGird")!;
+    public Grid _GirdFormAccountAdd => this.FindControl<Grid>("GirdFormAccountAdd")!;
+    public Grid _GirdSelectAccountType => this.FindControl<Grid>("GirdSelectAccountType")!;
+    public Grid _GirdOnlineMode => this.FindControl<Grid>("GirdOnlineMode")!;
+    public Grid _GirdOfflineMode => this.FindControl<Grid>("GirdOfflineMode")!;
     public Border _SelectNow => this.FindControl<Border>("PanelSelectNow")!;
     public Border _SelectVersionVanila => this.FindControl<Border>("SelectVersionVanila")!;
+    public Border _CreateAccount_Offline => this.FindControl<Border>("CreateAccount_Offline")!;
+    public Border _CreateAccount_Online => this.FindControl<Border>("CreateAccount_Online")!;
     public Image _BackMainWindow => this.FindControl<Image>("BackMainWindow")!;
+    public Image _IconAccount => this.FindControl<Image>("IconAccount")!;
+    public Image _CheckMarkAccount => this.FindControl<Image>("CheckMarkAccount")!;
+    public Image _OfflineAccount => this.FindControl<Image>("OfflineAccount")!;
+    public Image _OnlineAccount => this.FindControl<Image>("MicrosoftAccount")!;
     public Label _PlayTXT => this.FindControl<Label>("PlayTXTPanelSelect")!;
     public TextBlock _PlayTXTMinecraft => this.FindControl<TextBlock>("PlayTXT")!;
     public Label _ModBuild => this.FindControl<Label>("modbuilds")!;
@@ -47,7 +53,7 @@ public partial class Window1 : Avalonia.Controls.Window
     public Label _ServerTXT => this.FindControl<Label>("ServerTXTPanelSelect")!;
     public Label _TextBlockAccountName => this.FindControl<Label>("NameNik")!;
     public Label _AddProfile => this.FindControl<Label>("AddProfile")!;
-    public Image _CheckMarkAccount => this.FindControl<Image>("CheckMarkAccount")!;
+    public TextBox _NameNikManeger => this.FindControl<TextBox>("NameNikManeger")!;
     public Panel _PanelManegerAccount => this.FindControl<Panel>("PanelManegerAccount")!;
     #endregion
     
@@ -83,48 +89,172 @@ public partial class Window1 : Avalonia.Controls.Window
         _ModBuild.PointerPressed += (s, e) => { animationHelper.AnimateBorder(80, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "modbuilds"
         _ModsTXT.PointerPressed += (s, e) => { animationHelper.AnimateBorder(160, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "ModsTXTPanelSelect"
         _ServerTXT.PointerPressed += (s, e) => { animationHelper.AnimateBorder(223, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "ServerTXTPanelSelect"
-        _VersionMinecraftChangeLog.SelectionChanged += _VersionMinecraftChangeLog_SelectionChanged;
+        
+        _VersionMinecraftChangeLog.SelectionChanged += _VersionMinecraftChangeLog_SelectionChanged; // Обробка зміни вибору версії Minecraft(changelog) в ListBox
+
+        _GirdFormAccountAdd.PointerPressed += (s, e) => { animationHelper.FadeOutAsync(_GirdFormAccountAdd, 0.3); animationHelper.FadeOutAsync(_GirdOfflineMode, 0.3); animationHelper.FadeOutAsync(_GirdSelectAccountType, 0.3);  }; // Обробка натискання на форму додавання профілю для її закриття
+        _AddProfile.PointerPressed += _AddProfile_PointerPressed; // Обробка натискання на кнопку "AddProfile" для відкриття форми додавання профілю
+
+        _CreateAccount_Offline.PointerPressed += _CreateAccount_Offline_PointerPressed; // Обробка натискання на кнопку "CreateAccount_Offline" перевірка поля з ніком і створення офлайн-акаунту
+        _CreateAccount_Online.PointerPressed += _CreateAccount_Online_PointerPressed; ; // Обробка натискання на кнопку "CreateAccount_Online" відкриття форми для підключення до онлайн-акаунту
+        _OnlineAccount.PointerPressed += _OnlineAccount_PointerPressed; // Обробка натискання на кнопку "OnlineAccount" для перемикання на онлайн-акаунт
+        _OfflineAccount.PointerPressed += _OfflineAccount_PointerPressed; // Обробка натискання на кнопку "OfflineAccount" для перемикання на офлайн-акаунт
+        
         LoadChangeLogMinecraft(); // Завантаження списку версій Minecraft(changelog) для відображення в ListBox
+        LoadProfilesAndAddToListBox(); // Завантаження профілів з файлу і додавання їх до ListBox
     }
 
+    // Обробка натискання на кнопку "CreateAccount_Online" відкриття форми для підключення до онлайн-акаунту
+    private async void _CreateAccount_Online_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+    {
+        AnimationHelper animationHelper = new AnimationHelper();
+        try
+        {
+            loginHandler = JELoginHandlerBuilder.BuildDefault();
+            var sessionMicrosoft = await loginHandler.AuthenticateInteractively();
+
+            MicosoftAccount = true;
+            SettingsManager.Settings.MicrosoftAccount = MicosoftAccount;
+            SettingsManager.SaveSettings();
+
+            ProfileItem profileItem = new ProfileItem
+            {
+                NameAccount = sessionMicrosoft.Username,
+                UUID = sessionMicrosoft.UUID,
+                ImageUrl = $"https://mc-heads.net/avatar/{sessionMicrosoft.UUID}".ToString(),
+                AccessToken = sessionMicrosoft.AccessToken,
+                OfficalAccount = true,
+            };
+            await animationHelper.FadeOutAsync(GirdOfflineMode, 0.2); await animationHelper.FadeOutAsync(GirdOnlineMode, 0.2); await animationHelper.FadeOutAsync(GirdFormAccountAdd, 0.2); await animationHelper.FadeOutAsync(GirdSelectAccountType, 0.2);
+            SaveProfile(profileItem);
+            LoadProfilesAndAddToListBox();
+        }
+        catch (Exception ex)
+        {
+            MicosoftAccount = false;
+            SettingsManager.Settings.MicrosoftAccount = MicosoftAccount;
+            SettingsManager.SaveSettings();
+
+            MessageBoxManager.GetMessageBoxStandard("!",$"Помилка входу в Microsoft {ex.Message}",ButtonEnum.Ok,MsBox.Avalonia.Enums.Icon.Error);
+            await animationHelper.FadeOutAsync(GirdOfflineMode, 0.2); await animationHelper.FadeOutAsync(GirdOnlineMode, 0.2); await animationHelper.FadeOutAsync(GirdFormAccountAdd, 0.2); await animationHelper.FadeOutAsync(GirdSelectAccountType, 0.2);
+        }
+    }
+
+    // Обробка натискання на кнопку "CreateAccount_Offline" перевірка поля з ніком і створення офлайн-акаунту
+    private async void _CreateAccount_Offline_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+    {
+        AnimationHelper animationHelper = new AnimationHelper();
+        try
+        {
+            Mojang mojang = new Mojang(new HttpClient()); 
+            PlayerUUID uuid = await mojang.GetUUID($"{_NameNikManeger.Text}");
+
+            ProfileItem profileItem = new ProfileItem
+            {
+                NameAccount = _NameNikManeger.Text,
+                UUID = uuid.UUID,
+                AccessToken = "-",
+                ImageUrl = $"https://mc-heads.net/avatar/".ToString(),
+                OfficalAccount = false
+            };
+            await animationHelper.FadeOutAsync(GirdOfflineMode, 0.2); await animationHelper.FadeOutAsync(GirdOnlineMode, 0.2); await animationHelper.FadeOutAsync(GirdFormAccountAdd, 0.2); await animationHelper.FadeOutAsync(GirdSelectAccountType, 0.2);
+            SaveProfile(profileItem);
+            LoadProfilesAndAddToListBox();
+        }
+        catch (Exception)
+        {
+            ProfileItem profileItem = new ProfileItem
+            {
+                NameAccount = _NameNikManeger.Text,
+                UUID = Guid.NewGuid().ToString(),
+                AccessToken = "-",
+                ImageUrl = $"https://mc-heads.net/avatar/".ToString(),
+                OfficalAccount = false
+            };
+            await animationHelper.FadeOutAsync(GirdOfflineMode, 0.2); await animationHelper.FadeOutAsync(GirdOnlineMode, 0.2); await animationHelper.FadeOutAsync(GirdFormAccountAdd, 0.2); await animationHelper.FadeOutAsync(GirdSelectAccountType, 0.2);
+            SaveProfile(profileItem);
+        }
+    }
+
+    // Обробка натискання на кнопку "OfflineAccount" для перемикання на офлайн-акаунт
+    private async void _OfflineAccount_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+    {
+        AnimationHelper animationHelper = new AnimationHelper();
+        await animationHelper.FadeOutAsync(_GirdOnlineMode, 0.2);
+        await animationHelper.FadeInAsync(_GirdOfflineMode, 0.5);
+    }
+    // Обробка натискання на кнопку "OnlineAccount" для перемикання на онлайн-акаунт
+    private async void _OnlineAccount_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+    {
+        AnimationHelper animationHelper = new AnimationHelper();
+        await animationHelper.FadeOutAsync(_GirdOfflineMode, 0.2);
+        await animationHelper.FadeInAsync(_GirdOnlineMode, 0.5);
+    }
+
+    // Обробка натискання на кнопку "AddProfile" для відкриття форми додавання профілю
+    private async void _AddProfile_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+    {
+        AnimationHelper animationHelper = new AnimationHelper();
+
+        await animationHelper.FadeInAsync(_GirdFormAccountAdd, 0.3); await animationHelper.FadeInAsync(_GirdOfflineMode, 0.3); await animationHelper.FadeInAsync(_GirdSelectAccountType, 0.3);
+
+        string directoryPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
+        string profilesManegerPath = System.IO.Path.Combine(directoryPath, "ProfilesManeger.json");
+
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
+        }
+
+        if (File.Exists(profilesManegerPath) == false)
+        {
+            using (FileStream fs = File.Create(profilesManegerPath))
+            {
+                fs.Close();
+            }
+        }
+
+    }
+
+    // Обробка натискання на кнопку "VersionMinecraftChangeLog" для відкриття вікі сттаті за версію Minecraft(changelog)
     private async void _VersionMinecraftChangeLog_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (_VersionMinecraftChangeLog.SelectedItem is string selectedVersion && _VersionMinecraftChangeLog != null)
         {
-            try
-            {
-                string wikiUrl = selectedVersion.StartsWith("a") ? $"https://minecraft.wiki/w/Java_Edition_Alpha_v{selectedVersion.Replace("a", "")}" :
-                                  selectedVersion.StartsWith("b") ? $"https://minecraft.wiki/w/Java_Edition_Beta_{selectedVersion.Replace("b", "")}" :
-                                  $"https://minecraft.wiki/w/Java_Edition_{selectedVersion}";
+            //try
+            //{
+            //    string wikiUrl = selectedVersion.StartsWith("a") ? $"https://minecraft.wiki/w/Java_Edition_Alpha_v{selectedVersion.Replace("a", "")}" :
+            //                      selectedVersion.StartsWith("b") ? $"https://minecraft.wiki/w/Java_Edition_Beta_{selectedVersion.Replace("b", "")}" :
+            //                      $"https://minecraft.wiki/w/Java_Edition_{selectedVersion}";
 
-                string url = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
-                using HttpClient httpClient = new HttpClient();
-                string json = await httpClient.GetStringAsync(url);
+            //    string url = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
+            //    using HttpClient httpClient = new HttpClient();
+            //    string json = await httpClient.GetStringAsync(url);
 
 
-                JObject manifest = JObject.Parse(json);
-                JArray versions = (JArray)manifest["versions"];
+            //    JObject manifest = JObject.Parse(json);
+            //    JArray versions = (JArray)manifest["versions"];
 
-                if (selectedVersion.StartsWith("1.7"))
-                {
-                    StartLinkChrom(wikiUrl);
-                }
-                else
-                {
-                    var selected = versions.FirstOrDefault(v => v["id"]?.ToString() == selectedVersion);
-                    if (selected != null)
-                    {
-                        string versionUrl = selected["url"]?.ToString();
-                        string versionJson = await httpClient.GetStringAsync(versionUrl);
-                        JObject versionData = JObject.Parse(versionJson);
-                    }
-                    StartLinkChrom(wikiUrl);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBoxManager.GetMessageBoxStandard("!","Помилка при завантаженні даних про версію: " + ex.Message);
-            }
+            //    if (selectedVersion.StartsWith("1.7"))
+            //    {
+            //        StartLinkChrom(wikiUrl);
+            //    }
+            //    else
+            //    {
+            //        var selected = versions.FirstOrDefault(v => v["id"]?.ToString() == selectedVersion);
+            //        if (selected != null)
+            //        {
+            //            string versionUrl = selected["url"]?.ToString();
+            //            string versionJson = await httpClient.GetStringAsync(versionUrl);
+            //            JObject versionData = JObject.Parse(versionJson);
+            //        }
+            //        StartLinkChrom(wikiUrl);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBoxManager.GetMessageBoxStandard("!","Помилка при завантаженні даних про версію: " + ex.Message);
+            //}
         }
     }
 
@@ -183,6 +313,7 @@ public partial class Window1 : Avalonia.Controls.Window
         }
         else
         {
+            LoadProfilesAndAddToListBox();
             await animHelper.FadeInAsync(_PanelManegerAccount, 0.3);
         }
     }
@@ -230,7 +361,7 @@ public partial class Window1 : Avalonia.Controls.Window
         await launcher.InstallAsync(version);        
         var process = await launcher.InstallAndBuildProcessAsync(version, new MLaunchOption
         {
-            Session = MSession.CreateOfflineSession("Gamer123"),
+            Session = session,
             MaximumRamMb = 2048
         });
         process.Start();
@@ -362,57 +493,63 @@ public partial class Window1 : Avalonia.Controls.Window
         }
         return false;
     }
-    public async void LoadProfilesAndAddToListBox()
+    // Метод для завантаження профілів з файлу і додавання їх до ListBox
+    public void LoadProfilesAndAddToListBox()
     {
-
         string directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
         string profilesManagerPath = Path.Combine(directoryPath, "ProfilesManeger.json");
 
         if (!File.Exists(profilesManagerPath))
         {
-            Settings1.Default.SelectIndexAccount = -1;
-            Settings1.Default.Save();
+            SettingsManager.Settings.SelectedIndex = -1;
+            SettingsManager.SaveSettings();
+
             if (!Directory.Exists(directoryPath))
             { Directory.CreateDirectory(directoryPath); File.Create(profilesManagerPath).Close(); }
+
             return;
         }
 
         try
         {
-            var encryptedData = File.ReadAllBytes(profilesManagerPath);
-            var decryptedJson = DecryptData(encryptedData);
-            var profiles = JsonConvert.DeserializeObject<List<ProfileItem>>(decryptedJson) ?? new();
-
-            ListAccount.Items.Clear();
+            var json = File.ReadAllText(profilesManagerPath);
+            if (string.IsNullOrWhiteSpace(json))
+                return;
+            var profiles = JsonConvert.DeserializeObject<List<ProfileItem>>(json) ?? new();
+            _ListAccount?.Items.Clear();
 
             for (byte i = 0; i < profiles.Count; i++)
             {
                 var profile = profiles[i];
                 var item = CreateProfileItem(profile, i);
 
-                item.DeleteAccount.MouseDown += (s, e) =>
+                item._DeleteAccount.PointerPressed += async (s, e) =>
                 {
-                    if (MessageBox.Show("Ви впевненні?", "!", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == System.Windows.Forms.DialogResult.Yes)
-                    { DeleteProfile(profiles, profile, item); }
+                    var result = await MessageBoxManager.GetMessageBoxStandard(
+                        "Ви впевненні?",
+                        "!",
+                        MsBox.Avalonia.Enums.ButtonEnum.YesNo,
+                        MsBox.Avalonia.Enums.Icon.Info
+                    ).ShowAsync();
+
+                    if (result == ButtonResult.Yes)
+                    {
+                        DeleteProfile(profiles, profile, item);
+                    }
                 };
-                item.ClickSelectAccount.MouseDown += async (s, e) => await SelectProfile(profile, (byte)i);
+                item._ClickSelectAccount.PointerPressed += async (s, e) => await SelectProfile(profile, (byte)i);
 
-                ListAccount.Items.Add(item);
+                _ListAccount?.Items.Add(item);
             }
-
         }
         catch (Exception ex)
         {
-            MessageBoxManager.GetMessageBoxStandard("!",$"Помилка при зчитуванні профілів: {ex.Message}");
+            MessageBoxManager.GetMessageBoxStandard("!", $"Помилка при зчитуванні профілів: {ex.Message}");
         }
     }
+    // Метод для створення профілю в ListBox
     private ItemManegerProfile CreateProfileItem(ProfileItem profile, int index)
     {
-        var image = new BitmapImage();
-        image.BeginInit();
-        image.UriSource = new Uri(profile.ImageUrl);
-        image.EndInit();
-
         return new ItemManegerProfile
         {
             NameAccount2 = profile.NameAccount,
@@ -421,47 +558,48 @@ public partial class Window1 : Avalonia.Controls.Window
             ImageUrl = profile.ImageUrl,
             OfficalAccount = profile.OfficalAccount,
             index = index,
-            IconAccountType = { Source = image },
-            NameAccount = { Text = profile.NameAccount }
+            _NameAccount = { Text = profile.NameAccount }
         };
     }
-
-    private void DeleteProfile(List<ProfileItem> profiles, ProfileItem profile, ItemManegerProfile item)
+    // Метод для видалення профілю з ListBox і файлу
+    public void DeleteProfile(List<ProfileItem> profiles, ProfileItem profile, ItemManegerProfile item)
     {
         MicosoftAccount = false;
-        Settings1.Default.Microsoft = false;
-        Settings1.Default.Save();
+        SettingsManager.Settings.MicrosoftAccount = false;
+        SettingsManager.SaveSettings();
 
-        if (Settings1.Default.SelectIndexAccount == ListAccount.SelectedIndex)
+        if (SettingsManager.Settings.SelectIndex == _ListAccount.SelectedIndex)
         {
-            Settings1.Default.SelectIndexAccount = -1;
-            Settings1.Default.Save();
+            SettingsManager.Settings.SelectedIndex = -1;
+            SettingsManager.SaveSettings();
         }
 
         _TextBlockAccountName.Content = "Відсутній акаунт";
-        IconAccount.Source = null;
+        _IconAccount.Source = null;
 
         profiles.Remove(profile);
         SaveProfiles(profiles);
-        ListAccount.Items.Remove(item);
+        _ListAccount.Items.Remove(item);
     }
 
-    private async Task SelectProfile(ProfileItem profile, byte index)
+    // Метод для вибору профілю з ListBox
+    public async Task SelectProfile(ProfileItem profile, byte index)
     {
         MicosoftAccount = profile.OfficalAccount;
-        Settings1.Default.Microsoft = profile.OfficalAccount;
+        SettingsManager.Settings.MicrosoftAccount = profile.OfficalAccount;
 
         if (profile.OfficalAccount)
             session = await loginHandler.AuthenticateSilently() ?? await loginHandler.Authenticate();
         else
             session = MSession.CreateOfflineSession(profile.NameAccount);
 
-        Settings1.Default.SelectIndexAccount = index;
-        Settings1.Default.Save();
+        SettingsManager.Settings.SelectIndex = index;
+        SettingsManager.SaveSettings();
 
         _TextBlockAccountName.Content = profile.NameAccount;
-        IconAccount.Source = new BitmapImage(new Uri(profile.ImageUrl));
+        _IconAccount.Source = new Bitmap(profile.ImageUrl);
     }
+    // Метод для збереження профілів у файл
     public void SaveProfiles(List<ProfileItem> profiles)
     {
         string directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
@@ -473,13 +611,12 @@ public partial class Window1 : Avalonia.Controls.Window
         }
 
         var jsonToWrite = JsonConvert.SerializeObject(profiles, Formatting.Indented);
-        var encryptedData = EncryptData(jsonToWrite);
-
-        File.WriteAllBytes(profilesManegerPath, encryptedData);
+        File.WriteAllText(profilesManegerPath, jsonToWrite);
 
         LoadProfilesAndAddToListBox();
     }
 
+    // Метод для збереження профілю в файл
     public void SaveProfile(ProfileItem profileItem)
     {
         var profiles = LoadProfiles();
@@ -493,6 +630,7 @@ public partial class Window1 : Avalonia.Controls.Window
         profiles.Add(profileItem);
         SaveProfiles(profiles); 
     }
+    // Метод для завантаження профілів з файлу
     public List<ProfileItem> LoadProfiles()
     {
         string directoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
@@ -505,10 +643,10 @@ public partial class Window1 : Avalonia.Controls.Window
 
         try
         {
-            var encryptedData = File.ReadAllBytes(profilesManegerPath);
-            var decryptedJson = DecryptData(encryptedData);
-            var profiles = JsonConvert.DeserializeObject<List<ProfileItem>>(decryptedJson) ?? new List<ProfileItem>();
-
+            var json = File.ReadAllText(profilesManegerPath);
+            if (string.IsNullOrWhiteSpace(json))
+                return new List<ProfileItem>();
+            var profiles = JsonConvert.DeserializeObject<List<ProfileItem>>(json) ?? new List<ProfileItem>();
             return profiles;
         }
         catch (Exception ex)
@@ -516,78 +654,6 @@ public partial class Window1 : Avalonia.Controls.Window
             MessageBoxManager.GetMessageBoxStandard("!", $"Помилка при зчитуванні профілів: {ex.Message}");
             return new List<ProfileItem>();
         }
-    }
-    private byte[] EncryptData(string plainText)
-    {
-        byte[] key = GetEncryptionKey();
-        byte[] iv = new byte[16];
-
-        using (Aes aes = Aes.Create())
-        {
-            aes.Key = key;
-            aes.IV = iv;
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.PKCS7;
-
-            using (var encryptor = aes.CreateEncryptor(aes.Key, aes.IV))
-            {
-                using (var ms = new MemoryStream())
-                {
-                    using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
-                    {
-                        using (var sw = new StreamWriter(cs))
-                        {
-                            sw.Write(plainText);
-                        }
-                    }
-                    return ms.ToArray();
-                }
-            }
-        }
-    }
-    private string DecryptData(byte[] cipherText)
-    {
-        byte[] key = GetEncryptionKey();
-        byte[] iv = new byte[16]; 
-
-        using (Aes aes = Aes.Create())
-        {
-            aes.Key = key;
-            aes.IV = iv;
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.PKCS7;
-
-            using (var decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
-            {
-                using (var ms = new MemoryStream(cipherText))
-                {
-                    using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
-                    {
-                        using (var sr = new StreamReader(cs))
-                        {
-                            return sr.ReadToEnd();
-                        }
-                    }
-                }
-            }
-        }
-    }
-    private byte[] GetEncryptionKey()
-    {
-        string base64Key = Settings1.Default.EncryptKey;
-
-        if (string.IsNullOrEmpty(base64Key) || Convert.FromBase64String(base64Key).Length != 16)
-        {
-            byte[] newKey = new byte[16];
-            new Random().NextBytes(newKey);
-            base64Key = Convert.ToBase64String(newKey);
-
-            Settings1.Default.EncryptKey = base64Key;
-            Settings1.Default.Save();
-
-            return newKey;
-        }
-        return Convert.FromBase64String(base64Key);
     }
 
 }

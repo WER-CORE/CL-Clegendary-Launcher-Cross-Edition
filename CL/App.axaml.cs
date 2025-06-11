@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -6,6 +7,7 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using CL.ViewModels;
 using CL.Views;
+using MsBox.Avalonia;
 
 namespace CL
 {
@@ -14,6 +16,7 @@ namespace CL
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
+            SettingsManager.LoadSettings();
         }
 
         public override void OnFrameworkInitializationCompleted()
@@ -31,7 +34,6 @@ namespace CL
 
             base.OnFrameworkInitializationCompleted();
         }
-
         private void DisableAvaloniaDataAnnotationValidation()
         {
             // Get an array of plugins to remove
