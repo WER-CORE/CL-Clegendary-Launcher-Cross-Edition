@@ -89,7 +89,7 @@ namespace CL.Views
                 double previousValue = LoadingProgressBar.Value;
                 double targetValue = i;
 
-                await animationHelper.AnimateProgressBarAsync(previousValue, targetValue, TimeSpan.FromMilliseconds(100),LoadingProgressBar);
+                await AnimationHelper.AnimateProgressBarAsync(previousValue, targetValue, TimeSpan.FromMilliseconds(100),LoadingProgressBar);
 
                 if (i % 20 == 0)
                 {

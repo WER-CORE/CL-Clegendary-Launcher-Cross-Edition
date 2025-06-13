@@ -21,6 +21,7 @@ using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 using MojangAPI;
 using MojangAPI.Model;
+using Avalonia.Input;
 
 namespace CL;
 
@@ -66,7 +67,6 @@ public partial class Window1 : Avalonia.Controls.Window
     {
         InitializeComponent(); // Ініціалізація компонентів(завантаження XAML)
 
-        AnimationHelper animationHelper = new AnimationHelper(); // Ініціалізація анімаційного помічника    
         _CheckMarkAccount.PointerPressed += _CheckMarkAccount_PointerPressed; // Обробка натискання на кнопку "CheckMarkAccount" для управління панеллю облікових записів
         _BackMainWindow.PointerPressed += _BackMainWindow_PointerPressed; // Обробка натискання на кнопку "BackMainWindow" для управління панеллю вибору версії
         _SelectVersionVanila.PointerPressed += _SelectVersionVanila_PointerPressed; // Обробка натискання на кнопку "SelectVersionVanila" для управління панеллю вибору версії ванільної гри
@@ -85,14 +85,14 @@ public partial class Window1 : Avalonia.Controls.Window
             LaunchMinecraft(selectedVersion);
         }; // Обробка натискання на кнопку "PlayTXT" для запуску Minecraft з обраною версією
 
-        _PlayTXT.PointerPressed +=  (s, e) => { animationHelper.AnimateBorder(0, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "PlayTXTPanelSelect"
-        _ModBuild.PointerPressed += (s, e) => { animationHelper.AnimateBorder(80, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "modbuilds"
-        _ModsTXT.PointerPressed += (s, e) => { animationHelper.AnimateBorder(160, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "ModsTXTPanelSelect"
-        _ServerTXT.PointerPressed += (s, e) => { animationHelper.AnimateBorder(223, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "ServerTXTPanelSelect"
+        _PlayTXT.PointerPressed +=  (s, e) => { AnimationHelper.AnimateBorder(0, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "PlayTXTPanelSelect"
+        _ModBuild.PointerPressed += (s, e) => { AnimationHelper.AnimateBorder(80, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "modbuilds"
+        _ModsTXT.PointerPressed += (s, e) => { AnimationHelper.AnimateBorder(160, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "ModsTXTPanelSelect"
+        _ServerTXT.PointerPressed += (s, e) => { AnimationHelper.AnimateBorder(223, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "ServerTXTPanelSelect"
         
         _VersionMinecraftChangeLog.SelectionChanged += _VersionMinecraftChangeLog_SelectionChanged; // Обробка зміни вибору версії Minecraft(changelog) в ListBox
 
-        _GirdFormAccountAdd.PointerPressed += (s, e) => { animationHelper.FadeOutAsync(_GirdFormAccountAdd, 0.3); animationHelper.FadeOutAsync(_GirdOfflineMode, 0.3); animationHelper.FadeOutAsync(_GirdSelectAccountType, 0.3);  }; // Обробка натискання на форму додавання профілю для її закриття
+        _GirdFormAccountAdd.PointerPressed += _GirdFormAccountAdd_PointerPressed; // Обробка натискання на форму додавання профілю для її закриття
         _AddProfile.PointerPressed += _AddProfile_PointerPressed; // Обробка натискання на кнопку "AddProfile" для відкриття форми додавання профілю
 
         _CreateAccount_Offline.PointerPressed += _CreateAccount_Offline_PointerPressed; // Обробка натискання на кнопку "CreateAccount_Offline" перевірка поля з ніком і створення офлайн-акаунту
@@ -104,14 +104,18 @@ public partial class Window1 : Avalonia.Controls.Window
         LoadProfilesAndAddToListBox(); // Завантаження профілів з файлу і додавання їх до ListBox
     }
 
+    private async void _GirdFormAccountAdd_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        await AnimationHelper.FadeOutAsync(_GirdOfflineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdOnlineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdFormAccountAdd, 0.2); await AnimationHelper.FadeOutAsync(_GirdSelectAccountType, 0.2);
+    }
+
     // Обробка натискання на кнопку "CreateAccount_Online" відкриття форми для підключення до онлайн-акаунту
     private async void _CreateAccount_Online_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
-        AnimationHelper animationHelper = new AnimationHelper();
         try
         {
             loginHandler = JELoginHandlerBuilder.BuildDefault();
-            var sessionMicrosoft = await loginHandler.AuthenticateInteractively();
+            var sessionMicrosoft = await loginHandler.Authenticate();
 
             MicosoftAccount = true;
             SettingsManager.Settings.MicrosoftAccount = MicosoftAccount;
@@ -125,7 +129,7 @@ public partial class Window1 : Avalonia.Controls.Window
                 AccessToken = sessionMicrosoft.AccessToken,
                 OfficalAccount = true,
             };
-            await animationHelper.FadeOutAsync(GirdOfflineMode, 0.2); await animationHelper.FadeOutAsync(GirdOnlineMode, 0.2); await animationHelper.FadeOutAsync(GirdFormAccountAdd, 0.2); await animationHelper.FadeOutAsync(GirdSelectAccountType, 0.2);
+            await AnimationHelper.FadeOutAsync(_GirdOfflineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdOnlineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdFormAccountAdd, 0.2); await AnimationHelper.FadeOutAsync(_GirdSelectAccountType, 0.2);
             SaveProfile(profileItem);
             LoadProfilesAndAddToListBox();
         }
@@ -136,67 +140,52 @@ public partial class Window1 : Avalonia.Controls.Window
             SettingsManager.SaveSettings();
 
             MessageBoxManager.GetMessageBoxStandard("!",$"Помилка входу в Microsoft {ex.Message}",ButtonEnum.Ok,MsBox.Avalonia.Enums.Icon.Error);
-            await animationHelper.FadeOutAsync(GirdOfflineMode, 0.2); await animationHelper.FadeOutAsync(GirdOnlineMode, 0.2); await animationHelper.FadeOutAsync(GirdFormAccountAdd, 0.2); await animationHelper.FadeOutAsync(GirdSelectAccountType, 0.2);
+            await AnimationHelper.FadeOutAsync(_GirdOfflineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdOnlineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdFormAccountAdd, 0.2); await AnimationHelper.FadeOutAsync(_GirdSelectAccountType, 0.2);
         }
     }
-
     // Обробка натискання на кнопку "CreateAccount_Offline" перевірка поля з ніком і створення офлайн-акаунту
     private async void _CreateAccount_Offline_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
-        AnimationHelper animationHelper = new AnimationHelper();
         try
         {
-            Mojang mojang = new Mojang(new HttpClient()); 
-            PlayerUUID uuid = await mojang.GetUUID($"{_NameNikManeger.Text}");
+            string uuid = Guid.NewGuid().ToString();
 
             ProfileItem profileItem = new ProfileItem
             {
                 NameAccount = _NameNikManeger.Text,
-                UUID = uuid.UUID,
+                UUID = uuid,
                 AccessToken = "-",
                 ImageUrl = $"https://mc-heads.net/avatar/".ToString(),
                 OfficalAccount = false
             };
-            await animationHelper.FadeOutAsync(GirdOfflineMode, 0.2); await animationHelper.FadeOutAsync(GirdOnlineMode, 0.2); await animationHelper.FadeOutAsync(GirdFormAccountAdd, 0.2); await animationHelper.FadeOutAsync(GirdSelectAccountType, 0.2);
+            await AnimationHelper.FadeOutAsync(_GirdOfflineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdOnlineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdFormAccountAdd, 0.2); await AnimationHelper.FadeOutAsync(_GirdSelectAccountType, 0.2);
             SaveProfile(profileItem);
             LoadProfilesAndAddToListBox();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            ProfileItem profileItem = new ProfileItem
-            {
-                NameAccount = _NameNikManeger.Text,
-                UUID = Guid.NewGuid().ToString(),
-                AccessToken = "-",
-                ImageUrl = $"https://mc-heads.net/avatar/".ToString(),
-                OfficalAccount = false
-            };
-            await animationHelper.FadeOutAsync(GirdOfflineMode, 0.2); await animationHelper.FadeOutAsync(GirdOnlineMode, 0.2); await animationHelper.FadeOutAsync(GirdFormAccountAdd, 0.2); await animationHelper.FadeOutAsync(GirdSelectAccountType, 0.2);
-            SaveProfile(profileItem);
+            MessageBoxManager.GetMessageBoxStandard("!", $"Помилка створення офлайн акаунту {ex.Message}", ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error);
+            await AnimationHelper.FadeOutAsync(_GirdOfflineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdOnlineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdFormAccountAdd, 0.2); await AnimationHelper.FadeOutAsync(_GirdSelectAccountType, 0.2);
         }
     }
 
     // Обробка натискання на кнопку "OfflineAccount" для перемикання на офлайн-акаунт
     private async void _OfflineAccount_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
-        AnimationHelper animationHelper = new AnimationHelper();
-        await animationHelper.FadeOutAsync(_GirdOnlineMode, 0.2);
-        await animationHelper.FadeInAsync(_GirdOfflineMode, 0.5);
+        await AnimationHelper.FadeOutAsync(_GirdOnlineMode, 0.2);
+        await AnimationHelper.FadeInAsync(_GirdOfflineMode, 0.5);
     }
     // Обробка натискання на кнопку "OnlineAccount" для перемикання на онлайн-акаунт
     private async void _OnlineAccount_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
-        AnimationHelper animationHelper = new AnimationHelper();
-        await animationHelper.FadeOutAsync(_GirdOfflineMode, 0.2);
-        await animationHelper.FadeInAsync(_GirdOnlineMode, 0.5);
+        await AnimationHelper.FadeOutAsync(_GirdOfflineMode, 0.2);
+        await AnimationHelper.FadeInAsync(_GirdOnlineMode, 0.5);
     }
 
     // Обробка натискання на кнопку "AddProfile" для відкриття форми додавання профілю
     private async void _AddProfile_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
-        AnimationHelper animationHelper = new AnimationHelper();
-
-        await animationHelper.FadeInAsync(_GirdFormAccountAdd, 0.3); await animationHelper.FadeInAsync(_GirdOfflineMode, 0.3); await animationHelper.FadeInAsync(_GirdSelectAccountType, 0.3);
+        await AnimationHelper.FadeInAsync(_GirdFormAccountAdd, 0.3); await AnimationHelper.FadeInAsync(_GirdOfflineMode, 0.3); await AnimationHelper.FadeInAsync(_GirdSelectAccountType, 0.3);
 
         string directoryPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data");
         string profilesManegerPath = System.IO.Path.Combine(directoryPath, "ProfilesManeger.json");
@@ -219,44 +208,47 @@ public partial class Window1 : Avalonia.Controls.Window
     // Обробка натискання на кнопку "VersionMinecraftChangeLog" для відкриття вікі сттаті за версію Minecraft(changelog)
     private async void _VersionMinecraftChangeLog_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
+        if (!_VersionMinecraftChangeLog.IsPointerOver)
+            return;
+
         if (_VersionMinecraftChangeLog.SelectedItem is string selectedVersion && _VersionMinecraftChangeLog != null)
         {
-            //try
-            //{
-            //    string wikiUrl = selectedVersion.StartsWith("a") ? $"https://minecraft.wiki/w/Java_Edition_Alpha_v{selectedVersion.Replace("a", "")}" :
-            //                      selectedVersion.StartsWith("b") ? $"https://minecraft.wiki/w/Java_Edition_Beta_{selectedVersion.Replace("b", "")}" :
-            //                      $"https://minecraft.wiki/w/Java_Edition_{selectedVersion}";
+            try
+            {
+                string wikiUrl = selectedVersion.StartsWith("a") ? $"https://minecraft.wiki/w/Java_Edition_Alpha_v{selectedVersion.Replace("a", "")}" :
+                                      selectedVersion.StartsWith("b") ? $"https://minecraft.wiki/w/Java_Edition_Beta_{selectedVersion.Replace("b", "")}" :
+                                      $"https://minecraft.wiki/w/Java_Edition_{selectedVersion}";
 
-            //    string url = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
-            //    using HttpClient httpClient = new HttpClient();
-            //    string json = await httpClient.GetStringAsync(url);
+                string url = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
+                using HttpClient httpClient = new HttpClient();
+                string json = await httpClient.GetStringAsync(url);
 
+                JObject manifest = JObject.Parse(json);
+                JArray versions = (JArray)manifest["versions"];
 
-            //    JObject manifest = JObject.Parse(json);
-            //    JArray versions = (JArray)manifest["versions"];
-
-            //    if (selectedVersion.StartsWith("1.7"))
-            //    {
-            //        StartLinkChrom(wikiUrl);
-            //    }
-            //    else
-            //    {
-            //        var selected = versions.FirstOrDefault(v => v["id"]?.ToString() == selectedVersion);
-            //        if (selected != null)
-            //        {
-            //            string versionUrl = selected["url"]?.ToString();
-            //            string versionJson = await httpClient.GetStringAsync(versionUrl);
-            //            JObject versionData = JObject.Parse(versionJson);
-            //        }
-            //        StartLinkChrom(wikiUrl);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBoxManager.GetMessageBoxStandard("!","Помилка при завантаженні даних про версію: " + ex.Message);
-            //}
+                if (selectedVersion.StartsWith("1.7"))
+                {
+                    StartLinkChrom(wikiUrl);
+                }
+                else
+                {
+                    var selected = versions.FirstOrDefault(v => v["id"]?.ToString() == selectedVersion);
+                    if (selected != null)
+                    {
+                        string versionUrl = selected["url"]?.ToString();
+                        string versionJson = await httpClient.GetStringAsync(versionUrl);
+                        JObject versionData = JObject.Parse(versionJson);
+                    }
+                    StartLinkChrom(wikiUrl);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBoxManager.GetMessageBoxStandard("!", "Помилка при завантаженні даних про версію: " + ex.Message);
+            }
         }
     }
+
 
     // Обробка зміни вибору версії ванільної гри в ListBox
     private void _VersionVanil_SelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -270,51 +262,45 @@ public partial class Window1 : Avalonia.Controls.Window
     // Обробка натискання на кнопку "SelectVersionVanila" для приховання/показу панелі вибору версії ванільної гри
     private async void _SelectVersionVanila_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
-        var animHelper = new AnimationHelper();
-
         if (_SelectVersion.IsVisible)
         {
-            await animHelper.FadeOutAsync(_SelectVersion, 0.3);
+            await AnimationHelper.FadeOutAsync(_SelectVersion, 0.3);
             return;
         }
         else
         {
             ShowVanillaVersionListAsync();
-            await animHelper.FadeInAsync(_SelectVersion, 0.3);
+            await AnimationHelper.FadeInAsync(_SelectVersion, 0.3);
         }
     }
 
     // Обробка натискання на кнопку "BackMainWindow" для приховання/показу панелі вибору версії і приховання панелі вибору версії ванільної гри
     private async void _BackMainWindow_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
-        var animHelper = new AnimationHelper();
-
         if (_SelectVersionTypeGird.IsVisible)
         {
-            if (_SelectVersion.IsVisible) { await animHelper.FadeOutAsync(_SelectVersion, 0.2); }
-            await animHelper.FadeOutAsync(_SelectVersionTypeGird, 0.3);
+            if (_SelectVersion.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersion, 0.2); }
+            await AnimationHelper.FadeOutAsync(_SelectVersionTypeGird, 0.3);
             return;
         }
         else
         {
-            await animHelper.FadeInAsync(_SelectVersionTypeGird, 0.3);
+            await AnimationHelper.FadeInAsync(_SelectVersionTypeGird, 0.3);
         }
     }
 
     // Обробка натискання на кнопку "CheckMarkAccount" для приховання/показу панеллю облікових записів
     private async void _CheckMarkAccount_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
-        var animHelper = new AnimationHelper();
-
         if (_PanelManegerAccount.IsVisible)
         {
-            await animHelper.FadeOutAsync(_PanelManegerAccount, 0.3);
+            await AnimationHelper.FadeOutAsync(_PanelManegerAccount, 0.3);
             return;
         }
         else
         {
+            await AnimationHelper.FadeInAsync(_PanelManegerAccount, 0.3);
             LoadProfilesAndAddToListBox();
-            await animHelper.FadeInAsync(_PanelManegerAccount, 0.3);
         }
     }
     // Ініціалізація компонентів(завантаження XAML)
@@ -501,7 +487,7 @@ public partial class Window1 : Avalonia.Controls.Window
 
         if (!File.Exists(profilesManagerPath))
         {
-            SettingsManager.Settings.SelectedIndex = -1;
+            SettingsManager.Settings.SelectIndex = -1;
             SettingsManager.SaveSettings();
 
             if (!Directory.Exists(directoryPath))
@@ -597,7 +583,7 @@ public partial class Window1 : Avalonia.Controls.Window
         SettingsManager.SaveSettings();
 
         _TextBlockAccountName.Content = profile.NameAccount;
-        _IconAccount.Source = new Bitmap(profile.ImageUrl);
+        //_IconAccount.Source = new Bitmap(profile.ImageUrl);
     }
     // Метод для збереження профілів у файл
     public void SaveProfiles(List<ProfileItem> profiles)

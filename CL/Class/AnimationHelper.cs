@@ -20,7 +20,7 @@ namespace CL.Class
         /// <param name="element"></param>
         /// <param name="durationSeconds"></param>
         /// <returns></returns>
-        public async Task FadeInAsync(Control element, double durationSeconds)
+        public static async Task FadeInAsync(Control element, double durationSeconds)
         {
             if (element == null) return;
 
@@ -44,7 +44,7 @@ namespace CL.Class
         /// <param name="element"></param>
         /// <param name="durationSeconds"></param>
         /// <returns></returns>
-        public async Task FadeOutAsync(Control element, double durationSeconds)
+        public static async Task FadeOutAsync(Control element, double durationSeconds)
         {
             if (element == null) return;
 
@@ -62,7 +62,7 @@ namespace CL.Class
 
             element.IsVisible = false;
         }
-        public void AnimateBorder(double targetX, double targetY, Control border)
+        public static void AnimateBorder(double targetX, double targetY, Control border)
         {
             const int durationMs = 300;
             const int fps = 60;
@@ -108,7 +108,7 @@ namespace CL.Class
         /// <param name="to"></param>
         /// <param name="duration"></param>
         /// <returns></returns>
-        public async Task AnimateProgressBarAsync(double from, double to, TimeSpan duration, ProgressBar progressBar)
+        public static async Task AnimateProgressBarAsync(double from, double to, TimeSpan duration, ProgressBar progressBar)
         {
             int steps = 10;
             double stepValue = (to - from) / steps;

@@ -153,10 +153,10 @@
 		<!-- Список з всіма акаунтами -->
 		<Canvas Name="PanelManegerAccount" IsVisible="False">
 			<Border x:Name="OnllinePanel"
-					Width="136"
-					Height="134.04"
+					Width="146"
+					Height="130"
 					Canvas.Left="650"
-					Canvas.Top="40"
+					Canvas.Top="50"
 					BorderThickness="1"
 					CornerRadius="16"
 					Background="#202020"/>
@@ -172,15 +172,15 @@
 				   Cursor="Hand"/>
 
 			<ListBox x:Name="ListAccount"
-					 Width="136"
-					 Height="90"
+					 Width="145"
+					 Height="80"
 					 Canvas.Left="650"
-					 Canvas.Top="50"
+					 Canvas.Top="60"
 					 Background="#202020"
 					 BorderBrush="{x:Null}"
 					 Foreground="White"
 					 ScrollViewer.VerticalScrollBarVisibility="Hidden"
-					 ScrollViewer.HorizontalScrollBarVisibility="Hidden" />
+					 ScrollViewer.HorizontalScrollBarVisibility="Hidden"></ListBox>
 		</Canvas>
 
 		<!-- Панель з нижня -->

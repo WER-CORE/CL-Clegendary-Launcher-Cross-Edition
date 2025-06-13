@@ -15,7 +15,6 @@ namespace CL.Class
         public string UUID { get; set; }
         public string AccessToken { get; set; }
         public string ImageUrl { get; set; }
-        public int Index { get; set; }
         public bool OfficalAccount { get; set; }
         public static byte[] EncryptData(string plainText)
         {
