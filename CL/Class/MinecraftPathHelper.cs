@@ -36,7 +36,7 @@ namespace CL.Class
                 {
                     basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".clminecraft");
                 }
-                MessageBoxManager.GetMessageBoxStandard("Шлях встановлено", $"Новий шлях до лаунчера: {basePath}").ShowAsync();
+                //MessageBoxManager.GetMessageBoxStandard("Шлях встановлено", $"Новий шлях до лаунчера: {basePath}").ShowAsync();
             return basePath;
         }
     }

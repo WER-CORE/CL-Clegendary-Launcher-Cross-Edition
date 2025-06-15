@@ -15,13 +15,9 @@ using System.Diagnostics;
 using CL.CustomItem;
 using CmlLib.Core.Auth.Microsoft;
 using Newtonsoft.Json;
-using System.Security.Cryptography;
-using Avalonia.Media.Imaging;
-using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
-using MojangAPI;
-using MojangAPI.Model;
 using Avalonia.Input;
+using System.Text.RegularExpressions;
 
 namespace CL;
 
@@ -40,6 +36,10 @@ public partial class Window1 : Avalonia.Controls.Window
     public Grid _GirdOfflineMode => this.FindControl<Grid>("GirdOfflineMode")!;
     public Border _SelectNow => this.FindControl<Border>("PanelSelectNow")!;
     public Border _SelectVersionVanila => this.FindControl<Border>("SelectVersionVanila")!;
+    public Border _SelectVersionFabric => this.FindControl<Border>("SelectVersionFabric")!;
+    public Border _SelectVersionForge => this.FindControl<Border>("SelectVersionForge")!;
+    public Border _SelectVersionQuilt => this.FindControl<Border>("SelectVersionQuilt")!;
+
     public Border _CreateAccount_Offline => this.FindControl<Border>("CreateAccount_Offline")!;
     public Border _CreateAccount_Online => this.FindControl<Border>("CreateAccount_Online")!;
     public Image _BackMainWindow => this.FindControl<Image>("BackMainWindow")!;
@@ -54,10 +54,16 @@ public partial class Window1 : Avalonia.Controls.Window
     public Label _ServerTXT => this.FindControl<Label>("ServerTXTPanelSelect")!;
     public Label _TextBlockAccountName => this.FindControl<Label>("NameNik")!;
     public Label _AddProfile => this.FindControl<Label>("AddProfile")!;
+    public TextBox _SearchSystemTXT1 => this.FindControl<TextBox>("SearchSystemTXT1")!;
+    public TextBox _SearchSystemTXT2 => this.FindControl<TextBox>("SearchSystemTXT2")!;
     public TextBox _NameNikManeger => this.FindControl<TextBox>("NameNikManeger")!;
     public Panel _PanelManegerAccount => this.FindControl<Panel>("PanelManegerAccount")!;
+    public CheckBox _Snapshot => this.FindControl<CheckBox>("Snapshots")!;
+    public CheckBox _Relesed => this.FindControl<CheckBox>("Relesed")!;
+    public CheckBox _Beta => this.FindControl<CheckBox>("Beta")!;
+    public CheckBox _Alpha => this.FindControl<CheckBox>("Alpha")!;
     #endregion
-    
+
     // Ліцензія
     private bool MicosoftAccount;
     JELoginHandler loginHandler;
@@ -69,8 +75,15 @@ public partial class Window1 : Avalonia.Controls.Window
 
         _CheckMarkAccount.PointerPressed += _CheckMarkAccount_PointerPressed; // Обробка натискання на кнопку "CheckMarkAccount" для управління панеллю облікових записів
         _BackMainWindow.PointerPressed += _BackMainWindow_PointerPressed; // Обробка натискання на кнопку "BackMainWindow" для управління панеллю вибору версії
+        
         _SelectVersionVanila.PointerPressed += _SelectVersionVanila_PointerPressed; // Обробка натискання на кнопку "SelectVersionVanila" для управління панеллю вибору версії ванільної гри
         _VersionVanil.SelectionChanged += _VersionVanil_SelectionChanged; ; // Обробка натискання на список версій ванільної гри
+        _SearchSystemTXT1.TextChanged += (s, e) => ShowVanillaVersionListAsync(); // Обробка зміни тексту в полі пошуку версій ванільної гри
+
+        _Snapshot.IsCheckedChanged += ChangeCheckBoxVersionFilter_IsCheckedChanged; ; // Обробка наведення курсора на чекбокси фільтрації версій
+        _Relesed.IsCheckedChanged += ChangeCheckBoxVersionFilter_IsCheckedChanged; // Обробка наведення курсора на чекбокси фільтрації версій
+        _Beta.IsCheckedChanged += ChangeCheckBoxVersionFilter_IsCheckedChanged; // Обробка наведення курсора на чекбокси фільтрації версій
+        _Alpha.IsCheckedChanged += ChangeCheckBoxVersionFilter_IsCheckedChanged; // Обробка наведення курсора на чекбокси фільтрації версій
 
         _PlayTXTMinecraft.PointerPressed += async (s, e) =>
         {
@@ -102,6 +115,11 @@ public partial class Window1 : Avalonia.Controls.Window
         
         LoadChangeLogMinecraft(); // Завантаження списку версій Minecraft(changelog) для відображення в ListBox
         LoadProfilesAndAddToListBox(); // Завантаження профілів з файлу і додавання їх до ListBox
+    }
+
+    private void ChangeCheckBoxVersionFilter_IsCheckedChanged(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        ShowVanillaVersionListAsync();
     }
 
     private async void _GirdFormAccountAdd_PointerPressed(object? sender, PointerPressedEventArgs e)
@@ -311,49 +329,76 @@ public partial class Window1 : Avalonia.Controls.Window
     // Метод для отримання списку ванільних версій Minecraft і їх відображення в ListBox
     private async void ShowVanillaVersionListAsync()
     {
-        _VersionVanil.Items?.Clear();
-        var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
-        var launcher = new MinecraftLauncher(path);
-        var versions = await launcher.GetAllVersionsAsync();
-
-        foreach (var item in versions)
+        try
         {
-            _VersionVanil.Items.Add(item.Name);
+            _VersionVanil.Items?.Clear();
+
+            string searchText = _SearchSystemTXT1.Text.ToLower().Trim();
+            string pattern = string.IsNullOrEmpty(searchText) ? ".*" : searchText.Replace("*", ".*");
+            Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
+
+            var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
+            var launcher = new MinecraftLauncher(path);
+            var versions = await launcher.GetAllVersionsAsync();
+
+            foreach (var item in versions)
+            {
+                if (item.Type == "release" && regex.IsMatch(item.Name) && _Relesed.IsChecked == true)
+                    _VersionVanil.Items.Add(item.Name);
+                if (item.Type == "snapshot" && regex.IsMatch(item.Name) && _Snapshot.IsChecked == true)
+                    _VersionVanil.Items.Add(item.Name);
+                if (item.Type == "old_beta" && regex.IsMatch(item.Name) && _Beta.IsChecked == true)
+                    _VersionVanil.Items.Add(item.Name);
+                if (item.Type == "old_alpha" && regex.IsMatch(item.Name) && _Alpha.IsChecked == true)
+                    _VersionVanil.Items.Add(item.Name);
+            }
+        }
+        catch (Exception ex)
+        {
         }
     }
     // Метод для запуску Minecraft з обраною версією
     private async void LaunchMinecraft(string version)
     {
-        DowloadProgress dowloadProgress = new DowloadProgress();
-        dowloadProgress.Show();
-
-        var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
-        var launcher = new MinecraftLauncher(path);
-        System.Net.ServicePointManager.DefaultConnectionLimit = 1000000;
-
-        launcher.FileProgressChanged += (sender, args) =>
+        try
         {
-            int fileProgress = args.TotalTasks > 0 ? (int)((double)args.ProgressedTasks / args.TotalTasks * 100) : 0;
-            dowloadProgress.DowloadProgressBarFileTask(args.TotalTasks, args.ProgressedTasks, args.Name);
-            dowloadProgress.DowloadProgressBarVersion(fileProgress, version);
-        };
+            if (_SelectVersion.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersion, 0.2); }
+            await AnimationHelper.FadeOutAsync(_SelectVersionTypeGird, 0.3);
 
-        launcher.ByteProgressChanged += (sender, args) =>
+            DowloadProgress dowloadProgress = new DowloadProgress();
+            dowloadProgress.Show();
+
+            var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
+            var launcher = new MinecraftLauncher(path);
+            System.Net.ServicePointManager.DefaultConnectionLimit = 1000000;
+
+            launcher.FileProgressChanged += (sender, args) =>
+            {
+                int fileProgress = args.TotalTasks > 0 ? (int)((double)args.ProgressedTasks / args.TotalTasks * 100) : 0;
+                dowloadProgress.DowloadProgressBarFileTask(args.TotalTasks, args.ProgressedTasks, args.Name);
+                dowloadProgress.DowloadProgressBarVersion(fileProgress, version);
+            };
+
+            launcher.ByteProgressChanged += (sender, args) =>
+            {
+                int byteProgress = args.TotalBytes > 0 ? (int)((double)args.ProgressedBytes / args.TotalBytes * 100) : 0;
+                dowloadProgress.DowloadProgressBarFile(byteProgress);
+            };
+
+            await launcher.InstallAsync(version);
+            var process = await launcher.InstallAndBuildProcessAsync(version, new MLaunchOption
+            {
+                Session = session,
+                MaximumRamMb = 2048
+            });
+            process.Start();
+
+            this.WindowState = WindowState.Minimized;
+            dowloadProgress.Close();
+        }
+        catch (Exception)
         {
-            int byteProgress = args.TotalBytes > 0 ? (int)((double)args.ProgressedBytes / args.TotalBytes * 100) : 0;
-            dowloadProgress.DowloadProgressBarFile(byteProgress);
-        };
-
-        await launcher.InstallAsync(version);        
-        var process = await launcher.InstallAndBuildProcessAsync(version, new MLaunchOption
-        {
-            Session = session,
-            MaximumRamMb = 2048
-        });
-        process.Start();
-
-        this.WindowState = WindowState.Minimized;
-        dowloadProgress.Close();
+        }
         //await DiscordController.UpdatePresence($"Грає версію {version}");
     }
     private async void LoadChangeLogMinecraft()

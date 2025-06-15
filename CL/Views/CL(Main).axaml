@@ -253,26 +253,111 @@
 			</Grid>
 		</Border>
 		<!-- Панель для вибору версії -->
-            <Grid x:Name="SelectVersionTypeGird" Margin="10,2,886,394" IsVisible="False">
-                <Border x:Name="SelectVersionType" BorderThickness="1" CornerRadius="12,12,12,12" Background="Gray" Margin="577,175,-579,-204" Width="149"/>
-                <Border x:Name="SelectVersionVanila" Height="38" Width="139" BorderThickness="1" CornerRadius="7" Background="#202020" Margin="583,177,-574,-87" RenderTransformOrigin="0.5,0.5">
-                    <Border.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform/>
-                            <SkewTransform AngleY="-0.054"/>
-                            <RotateTransform/>
-                            <TranslateTransform Y="-0.066"/>
-                        </TransformGroup>
-                    </Border.RenderTransform>
-                    <Grid Background="{DynamicResource MainBackgroundBrush}">
-                        <Image x:Name="IconSelectVersion_Копировать" HorizontalAlignment="Left" Height="31" VerticalAlignment="Center" Width="30" Source="avares://CL/Assets/Vanila.png" Cursor="Hand" Stretch="Fill" Margin="4,0,0,0" RenderOptions.BitmapInterpolationMode="HighQuality"/>
-                        <Label x:Name="SettingTXT1_Копировать" FontFamily="Inter 18pt 18pt" Content="Vanila"  HorizontalAlignment="Left" VerticalAlignment="Top" Width="97" Height="24" Background="{x:Null}" FontSize="14" Foreground="White" Margin="33,-5,0,0"/>
-                        <Border x:Name="SelectVersion_Копировать1" BorderThickness="1" CornerRadius="3,3,3,3" Background="Gray" Margin="23,15,46,1" Width="38" Height="14">
-                            <Label x:Name="VersionRelesedVanilLast" FontFamily="Inter 18pt 18pt" Content="1.21.1"  HorizontalAlignment="Center" VerticalAlignment="Center" Width="47" Height="22" Background="{x:Null}" FontSize="10" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-                        </Border>
-                    </Grid>
-                </Border>
-            </Grid>
+		<Grid x:Name="SelectVersionTypeGird" Margin="10,2,886,394" IsVisible="True">
+			<Border x:Name="SelectVersionType" BorderThickness="1" CornerRadius="12" Background="Gray" Margin="577,175,-579,-204"/>
+
+			<!-- Vanilla -->
+			<Border x:Name="SelectVersionVanila" Height="38" Width="139" BorderThickness="1" CornerRadius="7" Background="#202020" Margin="583,172,-574,-87" RenderTransformOrigin="0.5,0.5">
+				<Border.RenderTransform>
+					<TransformGroup>
+						<ScaleTransform/>
+						<SkewTransform AngleY="-0.054"/>
+						<RotateTransform/>
+						<TranslateTransform Y="-0.066"/>
+					</TransformGroup>
+				</Border.RenderTransform>
+				<Grid Background="{DynamicResource MainBackgroundBrush}">
+					<Image x:Name="IconSelectVersionVanilla" HorizontalAlignment="Left" Height="31" VerticalAlignment="Center" Width="30" Source="avares://CL/Assets/Vanila.png" Cursor="Hand" Stretch="Fill" Margin="4,0,0,0" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+					<Label x:Name="LabelVanilla" FontFamily="Inter" Content="Vanila" HorizontalAlignment="Left" VerticalAlignment="Top" Width="97" Height="24" FontSize="14" Foreground="White" Margin="33,-5,0,0"/>
+					<Border x:Name="VersionVanillaContainer" BorderThickness="1" CornerRadius="3" Background="#303030" Margin="23,15,46,1" Width="38" Height="14">
+						<Label x:Name="VersionVanillaLatest" FontFamily="Inter" Content="1.21.1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="47" Height="22" FontSize="10" Foreground="White" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+					</Border>
+				</Grid>
+			</Border>
+
+			<!-- Fabric -->
+			<Border x:Name="SelectVersionFabric" Height="38" Width="139" BorderThickness="1" CornerRadius="7" Background="#202020" Margin="583,307,-574,-194" RenderTransformOrigin="0.5,0.5">
+				<Border.RenderTransform>
+					<TransformGroup>
+						<ScaleTransform/>
+						<SkewTransform AngleY="-0.054"/>
+						<RotateTransform/>
+						<TranslateTransform Y="-0.066"/>
+					</TransformGroup>
+				</Border.RenderTransform>
+				<Grid Background="{DynamicResource MainBackgroundBrush}">
+					<Image x:Name="IconSelectVersionFabric" HorizontalAlignment="Left" Height="27" VerticalAlignment="Center" Width="30" Cursor="Hand" Margin="4,0,0,0" Stretch="Fill" Source="avares://CL/Assets/fabric.png" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+					<Label x:Name="LabelFabric" FontFamily="Inter" Content="Fabric" HorizontalAlignment="Left" VerticalAlignment="Top" Width="98" Height="24" FontSize="14" Foreground="{DynamicResource MainForegroundBrush}" Margin="34,-6,0,0"/>
+					<Border x:Name="VersionFabricMCContainer" BorderThickness="1" CornerRadius="3" Background="#303030" Margin="29,10,49,0" Width="38" Height="14">
+						<Label x:Name="VersionFabricMC" FontFamily="Inter" Content="1.21.1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="37" Height="21" FontSize="10" Foreground="{DynamicResource MainForegroundBrush}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+					</Border>
+					<Border x:Name="VersionFabricLoaderContainer" BorderThickness="1" CornerRadius="3" Background="#303030" Margin="76,10,2,0" Width="50" Height="14">
+						<Label x:Name="VersionFabricLoader" FontFamily="Inter" Content="" HorizontalAlignment="Center" VerticalAlignment="Center" Width="37" Height="21" FontSize="10" Foreground="{DynamicResource MainForegroundBrush}"/>
+					</Border>
+				</Grid>
+			</Border>
+
+			<!-- Forge -->
+			<Border x:Name="SelectVersionForge" Height="38" Width="139" BorderThickness="1" CornerRadius="7" Background="#202020" Margin="583,260,-574,-160" RenderTransformOrigin="0.5,0.5">
+				<Border.RenderTransform>
+					<TransformGroup>
+						<ScaleTransform/>
+						<SkewTransform AngleY="-0.054"/>
+						<RotateTransform/>
+						<TranslateTransform Y="-0.066"/>
+					</TransformGroup>
+				</Border.RenderTransform>
+				<Grid>
+					<Image x:Name="IconSelectVersionForge" HorizontalAlignment="Left" Height="27" VerticalAlignment="Center" Width="30" Cursor="Hand" Margin="4,0,0,0" Stretch="Fill" Source="avares://CL/Assets/ForgeIcon.jpg" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+					<Label x:Name="LabelForge" FontFamily="Inter" Content="Forge" HorizontalAlignment="Left" VerticalAlignment="Top" Width="97" Height="26" FontSize="14" Foreground="{DynamicResource MainForegroundBrush}" Margin="33,-5,0,0"/>
+					<Border x:Name="VersionForgeMCContainer" BorderThickness="1" CornerRadius="3" Background="#303030" Margin="30,10,49,0" Width="38" Height="14">
+						<Label x:Name="VersionForgeMC" FontFamily="Inter" Content="1.21.1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="37" Height="21" FontSize="10" Foreground="{DynamicResource MainForegroundBrush}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+					</Border>
+					<Border x:Name="VersionForgeLoaderContainer" BorderThickness="1" CornerRadius="3" Background="#303030" Margin="76,10,2,0" RenderTransformOrigin="0.5,0.5" Width="50" Height="14">
+						<Border.RenderTransform>
+							<TransformGroup>
+								<ScaleTransform/>
+								<SkewTransform AngleY="0.599"/>
+								<RotateTransform/>
+								<TranslateTransform Y="-0.256"/>
+							</TransformGroup>
+						</Border.RenderTransform>
+						<Label x:Name="VersionForgeLoader" FontFamily="Inter" Content="" HorizontalAlignment="Center" VerticalAlignment="Center" Width="57" Height="22" FontSize="8" Foreground="{DynamicResource MainForegroundBrush}" HorizontalContentAlignment="Center"/>
+					</Border>
+				</Grid>
+			</Border>
+
+			<!-- Quilt -->
+			<Border x:Name="SelectVersionQuilt" Height="38" Width="139" BorderThickness="1" CornerRadius="3" Background="#202020" Margin="583,219,-574,-120" RenderTransformOrigin="0.5,0.5">
+				<Border.RenderTransform>
+					<TransformGroup>
+						<ScaleTransform/>
+						<SkewTransform AngleY="-0.054"/>
+						<RotateTransform/>
+						<TranslateTransform Y="-0.066"/>
+					</TransformGroup>
+				</Border.RenderTransform>
+				<Grid Background="{DynamicResource MainBackgroundBrush}">
+					<Image x:Name="IconSelectVersionQuilt" HorizontalAlignment="Left" Height="31" VerticalAlignment="Center" Width="30" Source="avares://CL/Assets/images.png" Cursor="Hand" Stretch="Fill" Margin="4,0,0,0" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+					<Label x:Name="LabelQuilt" FontFamily="Inter" Content="Quilt" HorizontalAlignment="Left" VerticalAlignment="Top" Width="97" Height="24" FontSize="14" Foreground="{DynamicResource MainForegroundBrush}" Margin="34,-5,0,0"/>
+					<Border x:Name="VersionQuiltMCContainer" BorderThickness="1" CornerRadius="3" Background="#303030" Margin="23,10,46,1" Width="38" Height="14">
+						<Label x:Name="VersionQuiltMC" FontFamily="Inter" Content="1.21.1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="47" Height="22" FontSize="10" Foreground="{DynamicResource MainForegroundBrush}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+					</Border>
+					<Border x:Name="VersionQuiltLoaderContainer" BorderThickness="1" CornerRadius="3" Background="#303030" Margin="76,10,2,0" RenderTransformOrigin="0.5,0.5" Width="50" Height="14">
+						<Border.RenderTransform>
+							<TransformGroup>
+								<ScaleTransform/>
+								<SkewTransform AngleY="0.599"/>
+								<RotateTransform/>
+								<TranslateTransform Y="-0.256"/>
+							</TransformGroup>
+						</Border.RenderTransform>
+						<Label x:Name="VersionQuiltLoader" FontFamily="Inter" Content="" HorizontalAlignment="Center" VerticalAlignment="Center" Width="57" Height="22" FontSize="8" Foreground="{DynamicResource MainForegroundBrush}" HorizontalContentAlignment="Center"/>
+					</Border>
+				</Grid>
+			</Border>
+		</Grid>
+		<!-- Список версій для ваніли -->
 		<Border x:Name="SelectVersion" BorderThickness="1" CornerRadius="3,3,3,3" Background="#202020" Margin="740,170,181,193" RenderTransformOrigin="0.5,0.5" IsVisible="False">
 			<Border.RenderTransform>
 				<TransformGroup>
@@ -283,15 +368,34 @@
 				</TransformGroup>
 			</Border.RenderTransform>
 			<Grid Margin="0,-1,0,1">
-				<Border CornerRadius="3" Background="#202020" Margin="67,5,0,133" Height="10">
+				<Border CornerRadius="3" Background="#202020" Margin="67,-10,0,133" Height="10">
 					<TextBox x:Name="SearchSystemTXT1" TextWrapping="Wrap" Background="Gray" Foreground="White" BorderBrush="{x:Null}" CaretBrush="Aqua" VerticalContentAlignment="Center" FontSize="10" FontFamily="Arial" Padding="15,0,0,0" Text="" Height="10"/>
 				</Border>
-				<Image x:Name="IconSelectVersion_Копировать3" HorizontalAlignment="Left" Height="18" VerticalAlignment="Top" Width="21" Source="" Cursor="Hand"  Margin="65,3,0,0" />
+				<Image x:Name="IconSelectVersion_Копировать3" HorizontalAlignment="Left" Height="18" VerticalAlignment="Top" Width="21" Source="avares://CL/Assets/search.png" Cursor="Hand"  Margin="65,3,0,0" />
 				<CheckBox x:Name="Relesed" Content="Реліз" HorizontalAlignment="Left" VerticalAlignment="Top" Height="16" Width="60" Margin="70,43,0,0" Foreground="White" FontSize="10" IsChecked="True" FontFamily="Arial" Background="" BorderBrush="{x:Null}"/>
 				<CheckBox x:Name="Snapshots" Content="Снапшоти" HorizontalAlignment="Left" VerticalAlignment="Top" Height="15" Width="80" Margin="70,70,0,0" Foreground="White" FontSize="10" IsChecked="False"  FontFamily="Arial" Background="" BorderBrush="{x:Null}" />
 				<CheckBox x:Name="Beta" Content="Бета" HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Width="60" Margin="70,95,0,0" Foreground="White" FontSize="10" IsChecked="False"  FontFamily="Arial" Background="" BorderBrush="{x:Null}" />
                 <CheckBox x:Name="Alpha" Content="Альфа" HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Width="60" Margin="70,120,0,0" Foreground="White" FontSize="10" IsChecked="False" FontFamily="Arial" Background="" BorderBrush="{x:Null}" />
                 <ListBox x:Name="VersionList" Width="60" Height="180" FontSize="9" FontFamily="Arial" Background="Black" BorderBrush="Transparent" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Visible" FlowDirection="RightToLeft" Margin="-30,0,58,1" ScrollViewer.HorizontalScrollBarVisibility="Hidden" />
+			</Grid>
+		</Border>
+		<!-- Список версій для модових версій -->
+		<Border x:Name="SelectVersionMod" BorderThickness="1" CornerRadius="3,3,3,3" Background="#202020" Margin="740,160,181,193" RenderTransformOrigin="0.5,0.5" Width="150" IsVisible="False">
+			<Border.RenderTransform>
+				<TransformGroup>
+					<ScaleTransform/>
+					<SkewTransform AngleX="-0.212"/>
+					<RotateTransform/>
+					<TranslateTransform X="-0.13"/>
+				</TransformGroup>
+			</Border.RenderTransform>
+			<Grid Margin="0,-1,0,1">
+				<Border CornerRadius="3" Background="Gray" Margin="67,-30,0,133" Height="10">
+					<TextBox x:Name="SearchSystemTXT2" TextWrapping="Wrap" Background="Gray" Foreground="White" BorderBrush="{x:Null}" CaretBrush="White" VerticalContentAlignment="Center" FontSize="10" FontFamily="Inter 18pt 18pt" Padding="15,0,0,0" Text=""/>
+				</Border>
+				<Image x:Name="IconSelectVersion_Копировать7" HorizontalAlignment="Left" Height="18" VerticalAlignment="Top" Width="21" Source="avares://CL/Assets/search.png" Cursor="Hand" Margin="65,6,0,0" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+				<ListBox x:Name="VersionListVanila" FontSize="10" FontFamily="Inter 18pt 18pt" Background="Black" BorderBrush="Transparent" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" FlowDirection="RightToLeft" Margin="-30,0,58,1" Width="70" ScrollViewer.HorizontalScrollBarVisibility="Hidden"/>
+				<ListBox x:Name="VersionListMod" Height="150" FontSize="7" FontFamily="Inter 18pt 18pt" Background="Black" BorderBrush="Transparent" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" FlowDirection="RightToLeft" Margin="68,55,0,2" ScrollViewer.HorizontalScrollBarVisibility="Hidden"/>
 			</Grid>
 		</Border>
 		<!-- Головна панель додавання акаунту -->
