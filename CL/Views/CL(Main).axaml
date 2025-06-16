@@ -160,7 +160,18 @@
 					BorderThickness="1"
 					CornerRadius="16"
 					Background="#202020"/>
-
+			<ListBox x:Name="ListAccount"
+			    Width="145"
+				Height="80"
+			    Canvas.Left="650"
+			    Canvas.Top="60"
+			    Background="#202020"
+				BorderBrush="{x:Null}"
+				Foreground="White"
+				HorizontalAlignment="Left"
+				ScrollViewer.VerticalScrollBarVisibility="Hidden"
+				ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+			</ListBox>
 			<Label x:Name="AddProfile"
 				   Content="Додати профіль +"
 				   Width="206"
@@ -170,37 +181,90 @@
 				   HorizontalContentAlignment="Center"
 				   FontFamily="Inter 18pt 18pt"
 				   Cursor="Hand"/>
-
-			<ListBox x:Name="ListAccount"
-					 Width="145"
-					 Height="80"
-					 Canvas.Left="650"
-					 Canvas.Top="60"
-					 Background="#202020"
-					 BorderBrush="{x:Null}"
-					 Foreground="White"
-					 ScrollViewer.VerticalScrollBarVisibility="Hidden"
-					 ScrollViewer.HorizontalScrollBarVisibility="Hidden"></ListBox>
 		</Canvas>
 
-		<!-- Панель з нижня -->
+		<!-- Нижня панель -->
 		<Border x:Name="PanelFooter"
-				Width="1000"
-				Height="300"
-				BorderThickness="1"
-				CornerRadius="8"
-				Background="#202020"
-				Margin="0,335,0,10"
-				HorizontalAlignment="Stretch" Opacity="0.9"/>
-		<!-- Моніторінг серверів та Список версій майнкрафт-->
-		<ListBox x:Name="ServerMonitoring" HorizontalAlignment="Left" Height="145" Margin="615,360,0,0" VerticalAlignment="Top" Width="315" Background="#FF202020" Foreground="White" BorderBrush="White" Cursor="Hand" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden">		</ListBox>
-		<ListBox x:Name="VersionMinecraftChangeLog" HorizontalAlignment="Left" Height="145" Margin="23,360,0,0" VerticalAlignment="Top" Width="315" Background="#FF202020" Foreground="White" BorderBrush="White" Cursor="Hand" ScrollViewer.VerticalScrollBarVisibility="Hidden" ScrollViewer.HorizontalScrollBarVisibility="Hidden">		</ListBox>
-		<!-- Кастомізація,Тека лаунчера,Для власників серверів -->
-		<Border x:Name="SettingPanel" Width="236" Height="40" BorderThickness="1" CornerRadius="12,12,12,12" Background="#FF202020" Margin="356,370,360,115" Cursor="Hand"/>
-		<Border x:Name="FolderPanel" Width="236" Height="40" BorderThickness="1" CornerRadius="12,12,12,12" Background="#FF202020" Margin="356,420,360,115" Cursor="Hand"/>
-		<Border x:Name="ServerOwnerPanel" Width="236" Height="40" BorderThickness="1" CornerRadius="12,12,12,12" Background="#FF202020" Margin="356,470,360,115" Cursor="Hand"/>
+			Width="1000"
+			Height="300"
+			BorderThickness="0"
+			CornerRadius="12"
+			Background="#303030"
+			Margin="0,335,0,10"
+			HorizontalAlignment="Center"
+			VerticalAlignment="Bottom"
+			Opacity="0.85"/>
 
+		<!-- Моніторинг серверів -->
+		<ListBox x:Name="ServerMonitoring"
+			Width="315"
+			Height="145"
+			Margin="615,360,0,0"
+			Background="#202020"
+			Foreground="White"
+			BorderBrush="{x:Null}"
+			CornerRadius="12"
+			Padding="10"
+			Cursor="Hand"
+			ScrollViewer.VerticalScrollBarVisibility="Hidden"
+			ScrollViewer.HorizontalScrollBarVisibility="Hidden"/>
 
+		<!-- Список версій -->
+		<ListBox x:Name="VersionMinecraftChangeLog"
+			Width="315"
+			Height="145"
+			Margin="23,360,0,0"
+			Background="#202020"
+			Foreground="White"
+			BorderBrush="{x:Null}"
+			CornerRadius="12"
+			Padding="10"
+			Cursor="Hand"
+			ScrollViewer.VerticalScrollBarVisibility="Hidden"
+			ScrollViewer.HorizontalScrollBarVisibility="Hidden"/>
+
+	   <!-- Три кнопки -->
+	   <Border x:Name="SettingPanel"
+			Width="236"
+			Height="40"
+			Margin="356,370,0,0"
+			Background="#202020"
+			CornerRadius="12"
+			Cursor="Hand"
+			HorizontalAlignment="Left">
+			<StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+			    <Image Source="avares://CL/Assets/gear-solid.png" Width="20" Height="20" Margin="5" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+				<TextBlock Text="Налаштування" Foreground="White" FontSize="14" VerticalAlignment="Center"/>
+			</StackPanel>
+		</Border>
+		<!-- Тека лаунчера -->
+		<Border x:Name="FolderPanel"
+			Width="236"
+			Height="40"
+			Margin="356,420,0,0"
+			Background="#202020"
+			CornerRadius="12"
+			Cursor="Hand"
+			HorizontalAlignment="Left">
+			<StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+				<Image Source="avares://CL/Assets/folder-solid.png" Width="20" Height="20" Margin="5" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+				<TextBlock Text="Тека лаунчера" Foreground="White" FontSize="14" VerticalAlignment="Center"/>
+			</StackPanel>
+		</Border>
+		<!-- Кнопка для власників серверів -->
+		<Border x:Name="ServerOwnerPanel"
+			Width="236"
+		    Height="40"
+			Margin="356,470,0,0"
+			Background="#202020"
+			CornerRadius="12"
+			Cursor="Hand"
+			HorizontalAlignment="Left">
+			<StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+				<Image Source="avares://CL/Assets/server-solid.png" Width="20" Height="20" Margin="5" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+				<TextBlock Text="Для власників серверів" Foreground="White" FontSize="14" VerticalAlignment="Center"/>
+			</StackPanel>
+		</Border>
 		<!-- Основна кнопка -->
 		<Border x:Name="PlayButton"
 				Width="230"
@@ -229,15 +293,16 @@
 					   RenderOptions.BitmapInterpolationMode="HighQuality"/>
 				<Border x:Name="Line" BorderThickness="1" Margin="150,0,0,0" Background="#FF16951B" HorizontalAlignment="Left" VerticalAlignment="Top" Width="3" Height="45"></Border>
 				<!-- Текст "ГРАТИ" -->
-				<TextBlock x:Name="PlayTXT"
-						   Width="100"
-						   Text="ГРАТИ"
-						   FontSize="11"
-						   Foreground="White"
-						   HorizontalAlignment="Center"
-						   VerticalAlignment="Center"
-						   Margin="-10,0,0,0"
-						   FontFamily="Inter"/>
+                <Label x:Name="PlayTXT"
+                       Width="100"
+                       Content="ГРАТИ"
+                       FontSize="11"
+                       Foreground="White"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       HorizontalContentAlignment="Left"
+                       VerticalContentAlignment="Center"
+                       FontFamily="Inter"/>
 
 				<!-- Стрілка або інша іконка -->
 				<Image x:Name="BackMainWindow"
@@ -253,8 +318,8 @@
 			</Grid>
 		</Border>
 		<!-- Панель для вибору версії -->
-		<Grid x:Name="SelectVersionTypeGird" Margin="10,2,886,394" IsVisible="True">
-			<Border x:Name="SelectVersionType" BorderThickness="1" CornerRadius="12" Background="Gray" Margin="577,175,-579,-204"/>
+		<Grid x:Name="SelectVersionTypeGird" Margin="10,2,886,394" IsVisible="False">
+			<Border x:Name="SelectVersionType" BorderThickness="1" CornerRadius="12" Background="#303030" Margin="577,175,-579,-204"/>
 
 			<!-- Vanilla -->
 			<Border x:Name="SelectVersionVanila" Height="38" Width="139" BorderThickness="1" CornerRadius="7" Background="#202020" Margin="583,172,-574,-87" RenderTransformOrigin="0.5,0.5">
@@ -376,11 +441,11 @@
 				<CheckBox x:Name="Snapshots" Content="Снапшоти" HorizontalAlignment="Left" VerticalAlignment="Top" Height="15" Width="80" Margin="70,70,0,0" Foreground="White" FontSize="10" IsChecked="False"  FontFamily="Arial" Background="" BorderBrush="{x:Null}" />
 				<CheckBox x:Name="Beta" Content="Бета" HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Width="60" Margin="70,95,0,0" Foreground="White" FontSize="10" IsChecked="False"  FontFamily="Arial" Background="" BorderBrush="{x:Null}" />
                 <CheckBox x:Name="Alpha" Content="Альфа" HorizontalAlignment="Left" VerticalAlignment="Top" Height="20" Width="60" Margin="70,120,0,0" Foreground="White" FontSize="10" IsChecked="False" FontFamily="Arial" Background="" BorderBrush="{x:Null}" />
-                <ListBox x:Name="VersionList" Width="60" Height="180" FontSize="9" FontFamily="Arial" Background="Black" BorderBrush="Transparent" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Visible" FlowDirection="RightToLeft" Margin="-30,0,58,1" ScrollViewer.HorizontalScrollBarVisibility="Hidden" />
+                <ListBox x:Name="VersionList" Width="60" Height="180" FontSize="9" FontFamily="Arial" Background="#202020" BorderBrush="Transparent" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Visible" FlowDirection="RightToLeft" Margin="-30,0,58,1" ScrollViewer.HorizontalScrollBarVisibility="Hidden" />
 			</Grid>
 		</Border>
 		<!-- Список версій для модових версій -->
-		<Border x:Name="SelectVersionMod" BorderThickness="1" CornerRadius="3,3,3,3" Background="#202020" Margin="740,160,181,193" RenderTransformOrigin="0.5,0.5" Width="150" IsVisible="False">
+		<Border x:Name="SelectVersionMod" BorderThickness="1" CornerRadius="3,3,3,3" Background="#202020" Margin="740,160,181,193" RenderTransformOrigin="0.5,0.5" Height="190" Width="150" IsVisible="False">
 			<Border.RenderTransform>
 				<TransformGroup>
 					<ScaleTransform/>
@@ -390,12 +455,12 @@
 				</TransformGroup>
 			</Border.RenderTransform>
 			<Grid Margin="0,-1,0,1">
-				<Border CornerRadius="3" Background="Gray" Margin="67,-30,0,133" Height="10">
+				<Border CornerRadius="3" Background="Gray" Margin="67,-20,0,133" Height="10">
 					<TextBox x:Name="SearchSystemTXT2" TextWrapping="Wrap" Background="Gray" Foreground="White" BorderBrush="{x:Null}" CaretBrush="White" VerticalContentAlignment="Center" FontSize="10" FontFamily="Inter 18pt 18pt" Padding="15,0,0,0" Text=""/>
 				</Border>
 				<Image x:Name="IconSelectVersion_Копировать7" HorizontalAlignment="Left" Height="18" VerticalAlignment="Top" Width="21" Source="avares://CL/Assets/search.png" Cursor="Hand" Margin="65,6,0,0" RenderOptions.BitmapInterpolationMode="HighQuality"/>
-				<ListBox x:Name="VersionListVanila" FontSize="10" FontFamily="Inter 18pt 18pt" Background="Black" BorderBrush="Transparent" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" FlowDirection="RightToLeft" Margin="-30,0,58,1" Width="70" ScrollViewer.HorizontalScrollBarVisibility="Hidden"/>
-				<ListBox x:Name="VersionListMod" Height="150" FontSize="7" FontFamily="Inter 18pt 18pt" Background="Black" BorderBrush="Transparent" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" FlowDirection="RightToLeft" Margin="68,55,0,2" ScrollViewer.HorizontalScrollBarVisibility="Hidden"/>
+				<ListBox x:Name="VersionListVanila" FontSize="10" FontFamily="Inter 18pt 18pt" Background="#202020" BorderBrush="Transparent" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" FlowDirection="RightToLeft" Margin="-30,-6,58,1" Height="180" Width="60" ScrollViewer.HorizontalScrollBarVisibility="Hidden"/>
+				<ListBox x:Name="VersionListMod" Height="140" FontSize="7" FontFamily="Inter 18pt 18pt" Background="#202020" BorderBrush="Transparent" Foreground="White" ScrollViewer.VerticalScrollBarVisibility="Hidden" FlowDirection="RightToLeft" Margin="68,55,0,2" ScrollViewer.HorizontalScrollBarVisibility="Hidden"/>
 			</Grid>
 		</Border>
 		<!-- Головна панель додавання акаунту -->
