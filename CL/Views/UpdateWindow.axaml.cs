@@ -16,15 +16,14 @@ namespace CL;
 
 public partial class UpdateWindow : Window
 {
-    //Елементи
-    private ProgressBar ProgreesBarDowloadObj;
-    private Label DowoloadMBUpdateObj;
-    private Label VersionObj;
-
-
     public UpdateWindow()
     {
         InitializeComponent(); // Ініціалізація компонентів(завантаження XAML)
+
+        ProgreesBarDowload = this.FindControl<ProgressBar>("ProgreesBarDowload");
+        DowoloadMBUpdate = this.FindControl<Label>("DowoloadMBUpdate");
+        Version = this.FindControl<Label>("Version");
+        
         this.Loaded += (s, e) =>
         {
             CheckUpdate();
@@ -33,10 +32,6 @@ public partial class UpdateWindow : Window
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
-
-        ProgreesBarDowload = this.FindControl<ProgressBar>("ProgreesBarDowload");
-        DowoloadMBUpdate = this.FindControl<Label>("DowoloadMBUpdate");
-        Version = this.FindControl<Label>("Version");
     }
 
     // Перевірка наявності оновлень та завантаження нової версії лаунчера

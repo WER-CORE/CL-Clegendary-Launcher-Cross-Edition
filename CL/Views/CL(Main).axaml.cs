@@ -18,6 +18,9 @@ using Newtonsoft.Json;
 using MsBox.Avalonia.Enums;
 using Avalonia.Input;
 using System.Text.RegularExpressions;
+using CmlLib.Core.ModLoaders.FabricMC;
+using CmlLib.Core.ModLoaders.QuiltMC;
+using CmlLib.Core.Installer.Forge.Versions;
 
 namespace CL;
 
@@ -27,8 +30,11 @@ public partial class Window1 : Avalonia.Controls.Window
     #region Елементи керування
     public ListBox _ListAccount => this.FindControl<ListBox>("ListAccount")!;
     public ListBox _VersionVanil => this.FindControl<ListBox>("VersionList")!;
+    public ListBox _VersionListVanila => this.FindControl<ListBox>("VersionListVanila")!;
+    public ListBox _VersionListMod => this.FindControl<ListBox>("VersionListMod")!;
     public ListBox _VersionMinecraftChangeLog => this.FindControl<ListBox>("VersionMinecraftChangeLog")!;
     public Border _SelectVersion => this.FindControl<Border>("SelectVersion")!;
+    public Border _SelectVersionMod => this.FindControl<Border>("SelectVersionMod")!;
     public Grid _SelectVersionTypeGird => this.FindControl<Grid>("SelectVersionTypeGird")!;
     public Grid _GirdFormAccountAdd => this.FindControl<Grid>("GirdFormAccountAdd")!;
     public Grid _GirdSelectAccountType => this.FindControl<Grid>("GirdSelectAccountType")!;
@@ -39,7 +45,6 @@ public partial class Window1 : Avalonia.Controls.Window
     public Border _SelectVersionFabric => this.FindControl<Border>("SelectVersionFabric")!;
     public Border _SelectVersionForge => this.FindControl<Border>("SelectVersionForge")!;
     public Border _SelectVersionQuilt => this.FindControl<Border>("SelectVersionQuilt")!;
-
     public Border _CreateAccount_Offline => this.FindControl<Border>("CreateAccount_Offline")!;
     public Border _CreateAccount_Online => this.FindControl<Border>("CreateAccount_Online")!;
     public Image _BackMainWindow => this.FindControl<Image>("BackMainWindow")!;
@@ -48,7 +53,7 @@ public partial class Window1 : Avalonia.Controls.Window
     public Image _OfflineAccount => this.FindControl<Image>("OfflineAccount")!;
     public Image _OnlineAccount => this.FindControl<Image>("MicrosoftAccount")!;
     public Label _PlayTXT => this.FindControl<Label>("PlayTXTPanelSelect")!;
-    public TextBlock _PlayTXTMinecraft => this.FindControl<TextBlock>("PlayTXT")!;
+    public Label _PlayTXTMinecraft => this.FindControl<Label>("PlayTXT")!;
     public Label _ModBuild => this.FindControl<Label>("modbuilds")!;
     public Label _ModsTXT => this.FindControl<Label>("ModsTXTPanelSelect")!;
     public Label _ServerTXT => this.FindControl<Label>("ServerTXTPanelSelect")!;
@@ -64,10 +69,12 @@ public partial class Window1 : Avalonia.Controls.Window
     public CheckBox _Alpha => this.FindControl<CheckBox>("Alpha")!;
     #endregion
 
-    // Ліцензія
-    private bool MicosoftAccount;
-    JELoginHandler loginHandler;
-    MSession session;
+    // Для модових версій
+    string? type;
+    // Ліцензія та Офлайн
+    private bool? MicosoftAccount;
+    JELoginHandler? loginHandler;
+    MSession? session;
     
     public Window1()
     {
@@ -77,6 +84,11 @@ public partial class Window1 : Avalonia.Controls.Window
         _BackMainWindow.PointerPressed += _BackMainWindow_PointerPressed; // Обробка натискання на кнопку "BackMainWindow" для управління панеллю вибору версії
         
         _SelectVersionVanila.PointerPressed += _SelectVersionVanila_PointerPressed; // Обробка натискання на кнопку "SelectVersionVanila" для управління панеллю вибору версії ванільної гри
+        _SelectVersionFabric.PointerPressed += _SelectVersionFabric_PointerPressed; // Обробка натискання на кнопку "SelectVersionFabric" для управління панеллю вибору версії Fabric
+        _SelectVersionForge.PointerPressed += _SelectVersionForge_PointerPressed; // Обробка натискання на кнопку "SelectVersionForge" для управління панеллю вибору версії Forge;
+        _SelectVersionQuilt.PointerPressed += _SelectVersionQuilt_PointerPressed; // Обробка натискання на кнопку "SelectVersionQuilt" для управління панеллю вибору версії Quilt
+
+        _VersionListVanila.SelectionChanged += _VersionListVanila_SelectionChanged;
         _VersionVanil.SelectionChanged += _VersionVanil_SelectionChanged; ; // Обробка натискання на список версій ванільної гри
         _SearchSystemTXT1.TextChanged += (s, e) => ShowVanillaVersionListAsync(); // Обробка зміни тексту в полі пошуку версій ванільної гри
 
@@ -85,7 +97,7 @@ public partial class Window1 : Avalonia.Controls.Window
         _Beta.IsCheckedChanged += ChangeCheckBoxVersionFilter_IsCheckedChanged; // Обробка наведення курсора на чекбокси фільтрації версій
         _Alpha.IsCheckedChanged += ChangeCheckBoxVersionFilter_IsCheckedChanged; // Обробка наведення курсора на чекбокси фільтрації версій
 
-        _PlayTXTMinecraft.PointerPressed += async (s, e) =>
+        _PlayTXTMinecraft.PointerPressed += (s, e) =>
         {
             var selectedVersion = _VersionVanil.SelectedItem as string;
 
@@ -116,12 +128,12 @@ public partial class Window1 : Avalonia.Controls.Window
         LoadChangeLogMinecraft(); // Завантаження списку версій Minecraft(changelog) для відображення в ListBox
         LoadProfilesAndAddToListBox(); // Завантаження профілів з файлу і додавання їх до ListBox
     }
-
+    // Метод для оновлення списку версій ванільної гри при зміні фільтрів(чекбоксів)
     private void ChangeCheckBoxVersionFilter_IsCheckedChanged(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         ShowVanillaVersionListAsync();
     }
-
+    // Метод коли натискаемо на фон форми додавання профілю, щоб закрити форму
     private async void _GirdFormAccountAdd_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         await AnimationHelper.FadeOutAsync(_GirdOfflineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdOnlineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdFormAccountAdd, 0.2); await AnimationHelper.FadeOutAsync(_GirdSelectAccountType, 0.2);
@@ -141,10 +153,10 @@ public partial class Window1 : Avalonia.Controls.Window
 
             ProfileItem profileItem = new ProfileItem
             {
-                NameAccount = sessionMicrosoft.Username,
-                UUID = sessionMicrosoft.UUID,
-                ImageUrl = $"https://mc-heads.net/avatar/{sessionMicrosoft.UUID}".ToString(),
-                AccessToken = sessionMicrosoft.AccessToken,
+                NameAccount = sessionMicrosoft.Username ?? throw new InvalidOperationException("І'мя користувача null."),
+                UUID = sessionMicrosoft.UUID ?? throw new InvalidOperationException("UUID null."),
+                ImageUrl = $"https://mc-heads.net/avatar/{sessionMicrosoft.UUID}",
+                AccessToken = sessionMicrosoft.AccessToken ?? throw new InvalidOperationException("AccessToken null."),
                 OfficalAccount = true,
             };
             await AnimationHelper.FadeOutAsync(_GirdOfflineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdOnlineMode, 0.2); await AnimationHelper.FadeOutAsync(_GirdFormAccountAdd, 0.2); await AnimationHelper.FadeOutAsync(_GirdSelectAccountType, 0.2);
@@ -170,7 +182,7 @@ public partial class Window1 : Avalonia.Controls.Window
 
             ProfileItem profileItem = new ProfileItem
             {
-                NameAccount = _NameNikManeger.Text,
+                NameAccount = _NameNikManeger.Text ?? "null",
                 UUID = uuid,
                 AccessToken = "-",
                 ImageUrl = $"https://mc-heads.net/avatar/".ToString(),
@@ -242,7 +254,10 @@ public partial class Window1 : Avalonia.Controls.Window
                 string json = await httpClient.GetStringAsync(url);
 
                 JObject manifest = JObject.Parse(json);
-                JArray versions = (JArray)manifest["versions"];
+
+                JArray? versions = manifest["versions"] as JArray;
+                if (versions == null)
+                    throw new InvalidOperationException("Пусте повернення wiki");
 
                 if (selectedVersion.StartsWith("1.7"))
                 {
@@ -253,7 +268,7 @@ public partial class Window1 : Avalonia.Controls.Window
                     var selected = versions.FirstOrDefault(v => v["id"]?.ToString() == selectedVersion);
                     if (selected != null)
                     {
-                        string versionUrl = selected["url"]?.ToString();
+                        string? versionUrl = selected["url"]?.ToString();
                         string versionJson = await httpClient.GetStringAsync(versionUrl);
                         JObject versionData = JObject.Parse(versionJson);
                     }
@@ -266,15 +281,21 @@ public partial class Window1 : Avalonia.Controls.Window
             }
         }
     }
-
-
+    // Обробка зміни вибору версії ванільної гри а також підгрузка модових версій в ListBox
+    private void _VersionListVanila_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (_VersionListVanila.SelectedItem != null)
+        {
+            ShowModsVersion(null);
+        }
+    }
     // Обробка зміни вибору версії ванільної гри в ListBox
     private void _VersionVanil_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (_VersionVanil.SelectedItem != null)
         {
             var selectedVersion = _VersionVanil.SelectedItem as string;
-            _PlayTXTMinecraft.Text = $"ГРАТИ В ({selectedVersion})";
+            _PlayTXTMinecraft.Content = $"ГРАТИ В ({selectedVersion})";
         }
     }
     // Обробка натискання на кнопку "SelectVersionVanila" для приховання/показу панелі вибору версії ванільної гри
@@ -287,17 +308,64 @@ public partial class Window1 : Avalonia.Controls.Window
         }
         else
         {
-            ShowVanillaVersionListAsync();
+            if (_SelectVersionMod.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersionMod, 0.2); }
             await AnimationHelper.FadeInAsync(_SelectVersion, 0.3);
+            ShowVanillaVersionListAsync();
         }
     }
-
+    // Обробка натискання на кнопку "SelectVersionFabric" для приховання/показу панелі вибору версії Fabric
+    private async void _SelectVersionFabric_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (_SelectVersionMod.IsVisible)
+        {
+            await AnimationHelper.FadeOutAsync(_SelectVersionMod, 0.3);
+            return;
+        }
+        else
+        {
+            if (_SelectVersion.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersion, 0.2); }
+            await AnimationHelper.FadeInAsync(_SelectVersionMod, 0.3);
+            ShowModsVanilVersion("Fabric");
+        }
+    }
+    // Обробка натиснакня на кнопку "SelectVersionForge" для приховання/показу панелі вибору версії Forge
+    private async void _SelectVersionForge_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (_SelectVersionMod.IsVisible)
+        {
+            await AnimationHelper.FadeOutAsync(_SelectVersionMod, 0.3);
+            return;
+        }
+        else
+        {
+            if (_SelectVersion.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersion, 0.2); }
+            await AnimationHelper.FadeInAsync(_SelectVersionMod, 0.3);
+            ShowModsVanilVersion("Forge");
+        }
+    }
+    // Обробка натискання на кнопку "SelectVersionQuilt" для приховання/показу панелі вибору версії Quilt
+    private async void _SelectVersionQuilt_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (_SelectVersionMod.IsVisible)
+        {
+            await AnimationHelper.FadeOutAsync(_SelectVersionMod, 0.3);
+            return;
+        }
+        else
+        {
+            if (_SelectVersion.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersion, 0.2); }
+            await AnimationHelper.FadeInAsync(_SelectVersionMod, 0.3);
+            ShowModsVanilVersion("Quilt");
+        }
+    }
     // Обробка натискання на кнопку "BackMainWindow" для приховання/показу панелі вибору версії і приховання панелі вибору версії ванільної гри
     private async void _BackMainWindow_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
     {
         if (_SelectVersionTypeGird.IsVisible)
         {
             if (_SelectVersion.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersion, 0.2); }
+            if (_SelectVersionMod.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersionMod, 0.2); }
+
             await AnimationHelper.FadeOutAsync(_SelectVersionTypeGird, 0.3);
             return;
         }
@@ -333,7 +401,7 @@ public partial class Window1 : Avalonia.Controls.Window
         {
             _VersionVanil.Items?.Clear();
 
-            string searchText = _SearchSystemTXT1.Text.ToLower().Trim();
+            string? searchText = _SearchSystemTXT1?.Text?.ToLower().Trim();
             string pattern = string.IsNullOrEmpty(searchText) ? ".*" : searchText.Replace("*", ".*");
             Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
 
@@ -344,19 +412,114 @@ public partial class Window1 : Avalonia.Controls.Window
             foreach (var item in versions)
             {
                 if (item.Type == "release" && regex.IsMatch(item.Name) && _Relesed.IsChecked == true)
-                    _VersionVanil.Items.Add(item.Name);
+                    _VersionVanil?.Items?.Add(item.Name);
                 if (item.Type == "snapshot" && regex.IsMatch(item.Name) && _Snapshot.IsChecked == true)
-                    _VersionVanil.Items.Add(item.Name);
+                    _VersionVanil?.Items?.Add(item.Name);
                 if (item.Type == "old_beta" && regex.IsMatch(item.Name) && _Beta.IsChecked == true)
-                    _VersionVanil.Items.Add(item.Name);
+                    _VersionVanil?.Items?.Add(item.Name);
                 if (item.Type == "old_alpha" && regex.IsMatch(item.Name) && _Alpha.IsChecked == true)
-                    _VersionVanil.Items.Add(item.Name);
+                    _VersionVanil?.Items?.Add(item.Name);
+            }
+        }
+        catch (Exception)
+        {
+        }
+    }
+    // Метод для завантаження модових версій від залежності(Fabric, Forge, Quilt) і їх відображення в ListBox ванільні версії
+    public async void ShowModsVanilVersion(string type)
+    {
+        _VersionListMod.Items?.Clear();
+        _VersionListVanila.Items?.Clear();
+
+        this.type = type;
+        try
+        {
+            if (type == "Fabric")
+            {
+                var fabricInstaller = new FabricInstaller(new HttpClient());
+                var versions = await fabricInstaller.GetSupportedVersionNames();
+
+                foreach (var version in versions)
+                {
+                    _VersionListVanila?.Items?.Add(version);
+                }
+            }
+            if (type == "Forge")
+            {
+                var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
+                var launcher = new MinecraftLauncher(path);
+                var versions = await launcher.GetAllVersionsAsync();
+
+                foreach (var version in versions)
+                {
+                    if(version.Type == "release")
+                    {
+                        _VersionListVanila?.Items?.Add(version.Name);
+                    }
+                }
+            }
+            if (type == "Quilt")
+            {
+                var quiltInstaller = new QuiltInstaller(new HttpClient());
+                var versions = await quiltInstaller.GetSupportedVersionNames();
+
+                foreach (var version in versions)
+                {
+                    _VersionListVanila?.Items?.Add(version);
+                }
             }
         }
         catch (Exception ex)
         {
+            await MessageBoxManager.GetMessageBoxStandard("!", $"Помилка при завантаженні версій: {ex.Message}", ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
         }
     }
+    // Метод для завантаження модових версій від залежності(Fabric, Forge, Quilt) і їх відображення в ListBox модові версії
+    public async void ShowModsVersion(string type)
+    {
+        _VersionListMod.Items?.Clear();
+
+        type = this.type ?? "Forge";
+        
+        try
+        {
+            if (type == "Fabric")
+            {
+                var fabricInstaller = new FabricInstaller(new HttpClient());
+                var versions = await fabricInstaller.GetLoaders($"{_VersionListVanila.SelectedItem}");
+
+                foreach (var version in versions)
+                {
+                    _VersionListMod?.Items?.Add(version.Version);
+                }
+            }
+            if (type == "Forge")
+            {
+                var versionLoader = new ForgeVersionLoader(new HttpClient());
+                var versions = await versionLoader.GetForgeVersions($"{_VersionListVanila.SelectedItem}");
+
+                foreach (var version in versions)
+                {
+                    _VersionListMod?.Items?.Add(version.ForgeVersionName);
+                }
+            }
+            if (type == "Quilt")
+            {
+                var quiltInstaller = new QuiltInstaller(new HttpClient());
+                var versions = await quiltInstaller.GetLoaders($"{_VersionListVanila.SelectedItem}");
+
+                foreach (var version in versions)
+                {
+                    _VersionListMod?.Items?.Add(version.Version);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+           await MessageBoxManager.GetMessageBoxStandard("!", $"Помилка при завантаженні версій: {ex.Message}", ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
+        }
+    }
+
     // Метод для запуску Minecraft з обраною версією
     private async void LaunchMinecraft(string version)
     {
@@ -410,19 +573,21 @@ public partial class Window1 : Avalonia.Controls.Window
             string json = await httpClient.GetStringAsync(url);
 
             JObject manifest = JObject.Parse(json);
-            JArray versions = (JArray)manifest["versions"];
+            JArray? versions = (JArray?)manifest["versions"] as JArray;
+            if (versions == null)
+                throw new InvalidOperationException("Пусте повернення changelog");
 
             _VersionMinecraftChangeLog.Items?.Clear();
 
             foreach (var version in versions)
             {
-                string id = version["id"].ToString();
+                string? id = version["id"]?.ToString();
                 _VersionMinecraftChangeLog.Items?.Add(id);
 
                 if (id == "a1.0.4") break;
             }
 
-            if (_VersionMinecraftChangeLog.Items.Count > 0)
+            if (_VersionMinecraftChangeLog?.Items?.Count > 0)
                 _VersionMinecraftChangeLog.SelectedIndex = 0;
         }
         catch (Exception ex)
@@ -536,8 +701,9 @@ public partial class Window1 : Avalonia.Controls.Window
             SettingsManager.SaveSettings();
 
             if (!Directory.Exists(directoryPath))
-            { Directory.CreateDirectory(directoryPath); File.Create(profilesManagerPath).Close(); }
+                Directory.CreateDirectory(directoryPath);
 
+            File.Create(profilesManagerPath).Close();
             return;
         }
 
@@ -546,36 +712,49 @@ public partial class Window1 : Avalonia.Controls.Window
             var json = File.ReadAllText(profilesManagerPath);
             if (string.IsNullOrWhiteSpace(json))
                 return;
+
             var profiles = JsonConvert.DeserializeObject<List<ProfileItem>>(json) ?? new();
+            _ListAccount?.BeginInit();
             _ListAccount?.Items.Clear();
 
-            for (byte i = 0; i < profiles.Count; i++)
+            foreach (var (profile, index) in profiles.Select((p, i) => (p, (byte)i)))
             {
-                var profile = profiles[i];
-                var item = CreateProfileItem(profile, i);
+                var item = CreateProfileItem(profile, index);
 
-                item._DeleteAccount.PointerPressed += async (s, e) =>
+                if (item._DeleteAccount is Image deleteButton)
                 {
-                    var result = await MessageBoxManager.GetMessageBoxStandard(
-                        "Ви впевненні?",
-                        "!",
-                        MsBox.Avalonia.Enums.ButtonEnum.YesNo,
-                        MsBox.Avalonia.Enums.Icon.Info
-                    ).ShowAsync();
-
-                    if (result == ButtonResult.Yes)
+                    deleteButton.PointerPressed += async (s, e) =>
                     {
-                        DeleteProfile(profiles, profile, item);
-                    }
-                };
-                item._ClickSelectAccount.PointerPressed += async (s, e) => await SelectProfile(profile, (byte)i);
+                        var result = await MessageBoxManager.GetMessageBoxStandard(
+                            "Ви впевнені?",
+                            "Цей профіль буде видалено.",
+                            MsBox.Avalonia.Enums.ButtonEnum.YesNo,
+                            MsBox.Avalonia.Enums.Icon.Info
+                        ).ShowAsync();
+
+                        if (result == ButtonResult.Yes)
+                        {
+                            DeleteProfile(profiles, profile, item);
+                        }
+                    };
+                }
+
+                if (item._ClickSelectAccount is Grid selectButton)
+                {
+                    selectButton.PointerPressed += async (s, e) =>
+                    {
+                        await SelectProfile(profile, index);
+                    };
+                }
 
                 _ListAccount?.Items.Add(item);
             }
+
+            _ListAccount?.EndInit();
         }
         catch (Exception ex)
         {
-            MessageBoxManager.GetMessageBoxStandard("!", $"Помилка при зчитуванні профілів: {ex.Message}");
+            MessageBoxManager.GetMessageBoxStandard("!", $"Помилка при зчитуванні профілів: {ex.Message}").ShowAsync();
         }
     }
     // Метод для створення профілю в ListBox
