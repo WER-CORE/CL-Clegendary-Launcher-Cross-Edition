@@ -79,7 +79,7 @@ public partial class Window1 : Avalonia.Controls.Window
     public Window1()
     {
         InitializeComponent(); // Ініціалізація компонентів(завантаження XAML)
-
+        System.Net.ServicePointManager.DefaultConnectionLimit = 1000000;
         _CheckMarkAccount.PointerPressed += _CheckMarkAccount_PointerPressed; // Обробка натискання на кнопку "CheckMarkAccount" для управління панеллю облікових записів
         _BackMainWindow.PointerPressed += _BackMainWindow_PointerPressed; // Обробка натискання на кнопку "BackMainWindow" для управління панеллю вибору версії
         
@@ -88,7 +88,9 @@ public partial class Window1 : Avalonia.Controls.Window
         _SelectVersionForge.PointerPressed += _SelectVersionForge_PointerPressed; // Обробка натискання на кнопку "SelectVersionForge" для управління панеллю вибору версії Forge;
         _SelectVersionQuilt.PointerPressed += _SelectVersionQuilt_PointerPressed; // Обробка натискання на кнопку "SelectVersionQuilt" для управління панеллю вибору версії Quilt
 
-        _VersionListVanila.SelectionChanged += _VersionListVanila_SelectionChanged;
+        _VersionListMod.SelectionChanged += _VersionListMod_SelectionChanged; // Обробка натискання на список модових версій;
+        _VersionListVanila.SelectionChanged += _VersionListVanila_SelectionChanged; // Обробка натискання на список ванільних версій
+
         _VersionVanil.SelectionChanged += _VersionVanil_SelectionChanged; ; // Обробка натискання на список версій ванільної гри
         _SearchSystemTXT1.TextChanged += (s, e) => ShowVanillaVersionListAsync(); // Обробка зміни тексту в полі пошуку версій ванільної гри
 
@@ -97,18 +99,7 @@ public partial class Window1 : Avalonia.Controls.Window
         _Beta.IsCheckedChanged += ChangeCheckBoxVersionFilter_IsCheckedChanged; // Обробка наведення курсора на чекбокси фільтрації версій
         _Alpha.IsCheckedChanged += ChangeCheckBoxVersionFilter_IsCheckedChanged; // Обробка наведення курсора на чекбокси фільтрації версій
 
-        _PlayTXTMinecraft.PointerPressed += (s, e) =>
-        {
-            var selectedVersion = _VersionVanil.SelectedItem as string;
-
-            if (string.IsNullOrEmpty(selectedVersion))
-            {
-                MessageBoxManager.GetMessageBoxStandard("Помилка", "Оберіть версію для запуску.");
-                return;
-            }
-
-            LaunchMinecraft(selectedVersion);
-        }; // Обробка натискання на кнопку "PlayTXT" для запуску Minecraft з обраною версією
+        _PlayTXTMinecraft.PointerPressed += _PlayTXTMinecraft_PointerPressed; // Обробка натискання на кнопку "PlayTXTMinecraft" для запуску гри з обраною версією та типом завантажувача
 
         _PlayTXT.PointerPressed +=  (s, e) => { AnimationHelper.AnimateBorder(0, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "PlayTXTPanelSelect"
         _ModBuild.PointerPressed += (s, e) => { AnimationHelper.AnimateBorder(80, 0, _SelectNow); }; // Анімація для переміщення бордера до кнопки "modbuilds"
@@ -127,6 +118,33 @@ public partial class Window1 : Avalonia.Controls.Window
         
         LoadChangeLogMinecraft(); // Завантаження списку версій Minecraft(changelog) для відображення в ListBox
         LoadProfilesAndAddToListBox(); // Завантаження профілів з файлу і додавання їх до ListBox
+    }
+
+    private async void _PlayTXTMinecraft_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        var selectedVersion = _VersionVanil.SelectedItem as string;
+        var selectVersionMod = type != "Vanil" ? _VersionListMod.SelectedItem as string : null;
+
+        switch (type)
+        {
+            case "Vanil":
+                InstallVanilAndPlay(selectedVersion);
+                break;
+            case "Forge":
+                InstallForgeAndPlay(selectedVersion, selectVersionMod);
+                break;
+            case "Fabric":
+                InstallFabricAndPlay(selectedVersion, selectVersionMod);
+                break;
+            case "Quilt":
+                InstallQuiltAndPlay(selectedVersion, selectVersionMod);
+                break;
+            default:
+                await MessageBoxManager
+                    .GetMessageBoxStandard("Помилка", $"Невідомий тип завантажувача: {type}")
+                    .ShowAsync();
+                break;
+        }
     }
     // Метод для оновлення списку версій ванільної гри при зміні фільтрів(чекбоксів)
     private void ChangeCheckBoxVersionFilter_IsCheckedChanged(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -281,11 +299,21 @@ public partial class Window1 : Avalonia.Controls.Window
             }
         }
     }
+    private void _VersionListMod_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (_VersionListVanila.SelectedItem != null && _VersionListMod.SelectedItem != null)
+        {
+            var selectedVersion = _VersionListVanila.SelectedItem as string;
+            var selectedVersionMod = _VersionListMod.SelectedItem as string;
+            _PlayTXTMinecraft.Content = $"ГРАТИ В ({selectedVersion} : {selectedVersionMod})";
+        }
+    }
     // Обробка зміни вибору версії ванільної гри а також підгрузка модових версій в ListBox
     private void _VersionListVanila_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (_VersionListVanila.SelectedItem != null)
         {
+            type = "Vanil";
             ShowModsVersion(null);
         }
     }
@@ -521,7 +549,7 @@ public partial class Window1 : Avalonia.Controls.Window
     }
 
     // Метод для запуску Minecraft з обраною версією
-    private async void LaunchMinecraft(string version)
+    private async void InstallVanilAndPlay(string version)
     {
         try
         {
@@ -533,7 +561,6 @@ public partial class Window1 : Avalonia.Controls.Window
 
             var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
             var launcher = new MinecraftLauncher(path);
-            System.Net.ServicePointManager.DefaultConnectionLimit = 1000000;
 
             launcher.FileProgressChanged += (sender, args) =>
             {
@@ -564,6 +591,50 @@ public partial class Window1 : Avalonia.Controls.Window
         }
         //await DiscordController.UpdatePresence($"Грає версію {version}");
     }
+    private async void InstallFabricAndPlay(string selectedVersion, string selectVersionMod)
+    {
+        if (_SelectVersion.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersion, 0.2); }
+        await AnimationHelper.FadeOutAsync(_SelectVersionTypeGird, 0.3);
+
+        DowloadProgress dowloadProgress = new DowloadProgress();
+        dowloadProgress.Show();
+
+        var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
+        var launcher = new MinecraftLauncher(path);
+
+        var fabricInstaller = new FabricInstaller(new HttpClient());
+        var versionName = await fabricInstaller.Install(selectedVersion, selectVersionMod, path);
+
+        launcher.FileProgressChanged += (sender, args) =>
+        {
+            int fileProgress = args.TotalTasks > 0 ? (int)((double)args.ProgressedTasks / args.TotalTasks * 100) : 0;
+            dowloadProgress.DowloadProgressBarFileTask(args.TotalTasks, args.ProgressedTasks, args.Name);
+            dowloadProgress.DowloadProgressBarVersion(fileProgress, versionName);
+        };
+
+        launcher.ByteProgressChanged += (sender, args) =>
+        {
+            int byteProgress = args.TotalBytes > 0 ? (int)((double)args.ProgressedBytes / args.TotalBytes * 100) : 0;
+            dowloadProgress.DowloadProgressBarFile(byteProgress);
+        };
+
+        var process = await launcher.InstallAndBuildProcessAsync(versionName, new MLaunchOption
+        {
+            Session = session,
+            MaximumRamMb = 2048
+        });
+        process.Start();
+    }
+
+    private void InstallForgeAndPlay(string selectedVersion, string selectVersionMod)
+    {
+        throw new NotImplementedException();
+    }
+    private void InstallQuiltAndPlay(string selectedVersion, string selectVersionMod)
+    {
+        throw new NotImplementedException();
+    }
+
     private async void LoadChangeLogMinecraft()
     {
         try
