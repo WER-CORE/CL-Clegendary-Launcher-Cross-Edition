@@ -21,6 +21,8 @@ using System.Text.RegularExpressions;
 using CmlLib.Core.ModLoaders.FabricMC;
 using CmlLib.Core.ModLoaders.QuiltMC;
 using CmlLib.Core.Installer.Forge.Versions;
+using Avalonia.Platform.Storage;
+using CmlLib.Core.Installer.Forge;
 
 namespace CL;
 
@@ -54,6 +56,13 @@ public partial class Window1 : Avalonia.Controls.Window
     public Image _OnlineAccount => this.FindControl<Image>("MicrosoftAccount")!;
     public Label _PlayTXT => this.FindControl<Label>("PlayTXTPanelSelect")!;
     public Label _PlayTXTMinecraft => this.FindControl<Label>("PlayTXT")!;
+    public Label _VersionVanillaLatest => this.FindControl<Label>("VersionVanillaLatest")!;
+    public Label _VersionFabricMC => this.FindControl<Label>("VersionFabricMC")!;
+    public Label _VersionFabricLoader => this.FindControl<Label>("VersionFabricLoader")!;
+    public Label _VersionForgeMC => this.FindControl<Label>("VersionForgeMC")!;
+    public Label _VersionForgeLoader => this.FindControl<Label>("VersionForgeLoader")!;
+    public Label _VersionQuiltMC => this.FindControl<Label>("VersionQuiltMC")!;
+    public Label _VersionQuiltLoader => this.FindControl<Label>("VersionQuiltLoader")!;
     public Label _ModBuild => this.FindControl<Label>("modbuilds")!;
     public Label _ModsTXT => this.FindControl<Label>("ModsTXTPanelSelect")!;
     public Label _ServerTXT => this.FindControl<Label>("ServerTXTPanelSelect")!;
@@ -122,7 +131,7 @@ public partial class Window1 : Avalonia.Controls.Window
 
     private async void _PlayTXTMinecraft_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        var selectedVersion = _VersionVanil.SelectedItem as string;
+        var selectedVersion = _VersionListVanila.SelectedItem as string;
         var selectVersionMod = type != "Vanil" ? _VersionListMod.SelectedItem as string : null;
 
         switch (type)
@@ -263,35 +272,12 @@ public partial class Window1 : Avalonia.Controls.Window
         {
             try
             {
-                string wikiUrl = selectedVersion.StartsWith("a") ? $"https://minecraft.wiki/w/Java_Edition_Alpha_v{selectedVersion.Replace("a", "")}" :
-                                      selectedVersion.StartsWith("b") ? $"https://minecraft.wiki/w/Java_Edition_Beta_{selectedVersion.Replace("b", "")}" :
-                                      $"https://minecraft.wiki/w/Java_Edition_{selectedVersion}";
+               string baseWikiTitleUA = selectedVersion.StartsWith("a") ? $"Alpha_v{selectedVersion.Replace("a", "")}_(Java_Edition)" :
+                                         selectedVersion.StartsWith("b") ? $"Beta_{selectedVersion.Replace("b", "")}_(Java_Edition)" :
+                                         $"{selectedVersion}_(Java_Edition)";
+                string fandomUkUrl = $"https://uk.minecraft.wiki/w/{Uri.EscapeDataString(baseWikiTitleUA)}";
 
-                string url = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
-                using HttpClient httpClient = new HttpClient();
-                string json = await httpClient.GetStringAsync(url);
-
-                JObject manifest = JObject.Parse(json);
-
-                JArray? versions = manifest["versions"] as JArray;
-                if (versions == null)
-                    throw new InvalidOperationException("Пусте повернення wiki");
-
-                if (selectedVersion.StartsWith("1.7"))
-                {
-                    StartLinkChrom(wikiUrl);
-                }
-                else
-                {
-                    var selected = versions.FirstOrDefault(v => v["id"]?.ToString() == selectedVersion);
-                    if (selected != null)
-                    {
-                        string? versionUrl = selected["url"]?.ToString();
-                        string versionJson = await httpClient.GetStringAsync(versionUrl);
-                        JObject versionData = JObject.Parse(versionJson);
-                    }
-                    StartLinkChrom(wikiUrl);
-                }
+                StartLinkChrom(fandomUkUrl);
             }
             catch (Exception ex)
             {
@@ -306,6 +292,19 @@ public partial class Window1 : Avalonia.Controls.Window
             var selectedVersion = _VersionListVanila.SelectedItem as string;
             var selectedVersionMod = _VersionListMod.SelectedItem as string;
             _PlayTXTMinecraft.Content = $"ГРАТИ В ({selectedVersion} : {selectedVersionMod})";
+
+            if (type == "Forge")
+            {
+                _VersionForgeLoader.Content = _VersionListMod.SelectedItem;
+            }
+            else if (type == "Fabric")
+            {
+                _VersionFabricLoader.Content = _VersionListMod.SelectedItem;
+            }
+            if (type == "Quilt")
+            {
+                _VersionQuiltLoader.Content = _VersionListMod.SelectedItem;
+            }
         }
     }
     // Обробка зміни вибору версії ванільної гри а також підгрузка модових версій в ListBox
@@ -313,8 +312,19 @@ public partial class Window1 : Avalonia.Controls.Window
     {
         if (_VersionListVanila.SelectedItem != null)
         {
-            type = "Vanil";
-            ShowModsVersion(null);
+            ShowModsVersion(type);
+            if (type == "Forge")
+            {
+                _VersionForgeMC.Content = _VersionListVanila.SelectedItem;
+            }
+            else if (type == "Fabric")
+            {
+                _VersionFabricMC.Content = _VersionListVanila.SelectedItem;
+            }
+            if (type == "Quilt")
+            {
+                _VersionQuiltMC.Content = _VersionListVanila.SelectedItem;
+            }
         }
     }
     // Обробка зміни вибору версії ванільної гри в ListBox
@@ -323,6 +333,7 @@ public partial class Window1 : Avalonia.Controls.Window
         if (_VersionVanil.SelectedItem != null)
         {
             var selectedVersion = _VersionVanil.SelectedItem as string;
+            _VersionVanillaLatest.Content = selectedVersion;
             _PlayTXTMinecraft.Content = $"ГРАТИ В ({selectedVersion})";
         }
     }
@@ -336,6 +347,7 @@ public partial class Window1 : Avalonia.Controls.Window
         }
         else
         {
+            type = "Vanil";
             if (_SelectVersionMod.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersionMod, 0.2); }
             await AnimationHelper.FadeInAsync(_SelectVersion, 0.3);
             ShowVanillaVersionListAsync();
@@ -586,53 +598,143 @@ public partial class Window1 : Avalonia.Controls.Window
             this.WindowState = WindowState.Minimized;
             dowloadProgress.Close();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+           await MessageBoxManager.GetMessageBoxStandard("Помилка", $"Не вдалося встановити версію Minecraft. Перевірте підключення до інтернету або виберіть іншу версію. {ex}", ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
         }
         //await DiscordController.UpdatePresence($"Грає версію {version}");
     }
     private async void InstallFabricAndPlay(string selectedVersion, string selectVersionMod)
     {
-        if (_SelectVersion.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersion, 0.2); }
-        await AnimationHelper.FadeOutAsync(_SelectVersionTypeGird, 0.3);
-
-        DowloadProgress dowloadProgress = new DowloadProgress();
-        dowloadProgress.Show();
-
-        var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
-        var launcher = new MinecraftLauncher(path);
-
-        var fabricInstaller = new FabricInstaller(new HttpClient());
-        var versionName = await fabricInstaller.Install(selectedVersion, selectVersionMod, path);
-
-        launcher.FileProgressChanged += (sender, args) =>
+        try
         {
-            int fileProgress = args.TotalTasks > 0 ? (int)((double)args.ProgressedTasks / args.TotalTasks * 100) : 0;
-            dowloadProgress.DowloadProgressBarFileTask(args.TotalTasks, args.ProgressedTasks, args.Name);
-            dowloadProgress.DowloadProgressBarVersion(fileProgress, versionName);
-        };
+            if (_SelectVersionMod.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersionMod, 0.2); }
+            await AnimationHelper.FadeOutAsync(_SelectVersionTypeGird, 0.3);
 
-        launcher.ByteProgressChanged += (sender, args) =>
-        {
-            int byteProgress = args.TotalBytes > 0 ? (int)((double)args.ProgressedBytes / args.TotalBytes * 100) : 0;
-            dowloadProgress.DowloadProgressBarFile(byteProgress);
-        };
+            DowloadProgress dowloadProgress = new DowloadProgress();
+            dowloadProgress.Show();
 
-        var process = await launcher.InstallAndBuildProcessAsync(versionName, new MLaunchOption
+            var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
+            var launcher = new MinecraftLauncher(path);
+
+            var fabricInstaller = new FabricInstaller(new HttpClient());
+            var versionName = await fabricInstaller.Install(selectedVersion, selectVersionMod, path);
+
+            launcher.FileProgressChanged += (sender, args) =>
+            {
+                int fileProgress = args.TotalTasks > 0 ? (int)((double)args.ProgressedTasks / args.TotalTasks * 100) : 0;
+                dowloadProgress.DowloadProgressBarFileTask(args.TotalTasks, args.ProgressedTasks, args.Name);
+                dowloadProgress.DowloadProgressBarVersion(fileProgress, versionName);
+            };
+
+            launcher.ByteProgressChanged += (sender, args) =>
+            {
+                int byteProgress = args.TotalBytes > 0 ? (int)((double)args.ProgressedBytes / args.TotalBytes * 100) : 0;
+                dowloadProgress.DowloadProgressBarFile(byteProgress);
+            };
+
+            var process = await launcher.InstallAndBuildProcessAsync(versionName, new MLaunchOption
+            {
+                Session = session,
+                MaximumRamMb = 2048
+            });
+            process.Start();
+            this.WindowState = WindowState.Minimized;
+            dowloadProgress.Close();
+        }
+        catch (Exception ex)
         {
-            Session = session,
-            MaximumRamMb = 2048
-        });
-        process.Start();
+            await MessageBoxManager.GetMessageBoxStandard("Помилка", $"Не вдалося встановити версію Minecraft. Перевірте підключення до інтернету або виберіть іншу версію. {ex}", ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
+        }
     }
 
-    private void InstallForgeAndPlay(string selectedVersion, string selectVersionMod)
+    private async void InstallForgeAndPlay(string selectedVersion, string selectVersionMod)
     {
-        throw new NotImplementedException();
+        try
+        {
+            if (_SelectVersionMod.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersionMod, 0.2); }
+            await AnimationHelper.FadeOutAsync(_SelectVersionTypeGird, 0.3);
+
+            DowloadProgress dowloadProgress = new DowloadProgress();
+            dowloadProgress.Show();
+
+            var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
+            var launcher = new MinecraftLauncher(path);
+
+            var forge = new ForgeInstaller(launcher);
+
+            var versionName = await forge.Install(selectedVersion, selectVersionMod);
+
+            launcher.FileProgressChanged += (sender, args) =>
+            {
+                int fileProgress = args.TotalTasks > 0 ? (int)((double)args.ProgressedTasks / args.TotalTasks * 100) : 0;
+                dowloadProgress.DowloadProgressBarFileTask(args.TotalTasks, args.ProgressedTasks, args.Name);
+                dowloadProgress.DowloadProgressBarVersion(fileProgress, versionName);
+            };
+
+            launcher.ByteProgressChanged += (sender, args) =>
+            {
+                int byteProgress = args.TotalBytes > 0 ? (int)((double)args.ProgressedBytes / args.TotalBytes * 100) : 0;
+                dowloadProgress.DowloadProgressBarFile(byteProgress);
+            };
+
+            var process = await launcher.InstallAndBuildProcessAsync(versionName, new MLaunchOption
+            {
+                Session = session,
+                MaximumRamMb = 2048
+            });
+            process.Start();
+            this.WindowState = WindowState.Minimized;
+            dowloadProgress.Close();
+        }
+        catch (Exception ex)
+        {
+            await MessageBoxManager.GetMessageBoxStandard($"Помилка", $"Не вдалося встановити версію Minecraft. Перевірте підключення до інтернету або виберіть іншу версію. {ex}", ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
+        }
     }
-    private void InstallQuiltAndPlay(string selectedVersion, string selectVersionMod)
+    private async void InstallQuiltAndPlay(string selectedVersion, string selectVersionMod)
     {
-        throw new NotImplementedException();
+        try
+        {
+            if (_SelectVersionMod.IsVisible) { await AnimationHelper.FadeOutAsync(_SelectVersionMod, 0.2); }
+            await AnimationHelper.FadeOutAsync(_SelectVersionTypeGird, 0.3);
+
+            DowloadProgress dowloadProgress = new DowloadProgress();
+            dowloadProgress.Show();
+
+            var path = new MinecraftPath(MinecraftPathHelper.GetDefaultExtractPath());
+            var launcher = new MinecraftLauncher(path);
+
+            var quiltInstaller = new QuiltInstaller(new HttpClient());
+
+            var versionName = await quiltInstaller.Install(selectedVersion, selectVersionMod, path);
+
+            launcher.FileProgressChanged += (sender, args) =>
+            {
+                int fileProgress = args.TotalTasks > 0 ? (int)((double)args.ProgressedTasks / args.TotalTasks * 100) : 0;
+                dowloadProgress.DowloadProgressBarFileTask(args.TotalTasks, args.ProgressedTasks, args.Name);
+                dowloadProgress.DowloadProgressBarVersion(fileProgress, versionName);
+            };
+
+            launcher.ByteProgressChanged += (sender, args) =>
+            {
+                int byteProgress = args.TotalBytes > 0 ? (int)((double)args.ProgressedBytes / args.TotalBytes * 100) : 0;
+                dowloadProgress.DowloadProgressBarFile(byteProgress);
+            };
+
+            var process = await launcher.InstallAndBuildProcessAsync(versionName, new MLaunchOption
+            {
+                Session = session,
+                MaximumRamMb = 2048
+            });
+            process.Start();
+            this.WindowState = WindowState.Minimized;
+            dowloadProgress.Close();
+        }
+        catch (Exception ex)
+        {
+            await MessageBoxManager.GetMessageBoxStandard($"Помилка", $"Не вдалося встановити версію Minecraft. Перевірте підключення до інтернету або виберіть іншу версію. {ex}", ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Error).ShowAsync();
+        }
     }
 
     private async void LoadChangeLogMinecraft()

@@ -294,9 +294,9 @@
 				<Border x:Name="Line" BorderThickness="1" Margin="150,0,0,0" Background="#FF16951B" HorizontalAlignment="Left" VerticalAlignment="Top" Width="3" Height="45"></Border>
 				<!-- Текст "ГРАТИ" -->
                 <Label x:Name="PlayTXT"
-                       Width="100"
+                       Width="110"
                        Content="ГРАТИ"
-                       FontSize="11"
+                       FontSize="10"
                        Foreground="White"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Center"
